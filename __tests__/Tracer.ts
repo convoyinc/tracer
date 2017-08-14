@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 
-import Queue from '../src/Queue';
+import Reporter from '../src/Reporter';
 import Span from '../src/Span';
 import Tracer from '../src/Tracer';
 import { defaultConfig } from '../src/Tracer';
@@ -30,7 +30,7 @@ describe(`Trace`, () => {
     });
 
     it(`initializes a queue`, () => {
-      expect((tracer as any).queue).toBeInstanceOf(Queue);
+      expect((tracer as any).reporter).toBeInstanceOf(Reporter);
     });
   });
 
@@ -43,7 +43,7 @@ describe(`Trace`, () => {
     it(`adds an error to the current trace if we try to start another one`, () => {
       const trace = tracer.start(resource, name, service);
       tracer.start(resource, name);
-      expect(trace.error).toBe(true);
+      expect(trace.error).toBe(1);
       expect(trace.meta['error.message']).toMatch(/called when another trace was active/);
     });
   });
@@ -136,22 +136,22 @@ describe(`Trace`, () => {
   describe(`recordTrace`, () => {
     it(`doesn't queue the trace if a random float isn't greater than the sampling rate`, () => {
       tracer.start(resource, name);
-      (tracer as any).queue.queueTrace = jest.fn();
+      (tracer as any).reporter.reportTrace = jest.fn();
       Math.random = () => 0;
       tracer.recordTrace(tracer.get());
-      expect((tracer as any).queue.queueTrace).not.toHaveBeenCalled;
+      expect((tracer as any).reporter.reportTrace).not.toHaveBeenCalled;
     });
 
     it(`does queue the trace if a random float is greater than the sampling rate`, () => {
       tracer.start(resource, name);
-      (tracer as any).queue.queueTrace = jest.fn();
+      (tracer as any).reporter.reportTrace = jest.fn();
       Math.random = () => 1;
       tracer.recordTrace(tracer.get());
-      expect((tracer as any).queue.queueTrace).toHaveBeenCalled;
+      expect((tracer as any).reporter.reportTrace).toHaveBeenCalled;
     });
 
     it(`calls 'recordSpanTiming' for the trace and each of its children`, () => {
-      tracer.recordSpanTiming = jest.fn();
+      (tracer as any).recordSpanTiming = jest.fn();
       tracer.start(resource, name);
       const trace = tracer.get();
       trace.children = [span];
@@ -163,21 +163,37 @@ describe(`Trace`, () => {
 
   describe(`recordSpanTiming`, () => {
     it(`allows you to pass it extra metadata`, () => {
-      (tracer as any).queue.queueTiming = jest.fn();
+      (tracer as any).reporter.reportTiming = jest.fn();
       const extraMetadata = { baz: 'qux' };
-      tracer.recordSpanTiming(span, extraMetadata);
-      expect((tracer as any).queue.queueTiming.mock.calls[0][0].tags).toMatchObject(
+      (tracer as any).recordSpanTiming(span, extraMetadata);
+      expect((tracer as any).reporter.reportTiming.mock.calls[0][0].tags).toMatchObject(
         extraMetadata,
       );
     });
 
     it(`allows you to pass it a custom prefix`, () => {
-      (tracer as any).queue.queueTiming = jest.fn();
+      (tracer as any).reporter.reportTiming = jest.fn();
       const prefix = 'fooBarPrefix';
-      tracer.recordSpanTiming(span, {}, prefix);
-      expect((tracer as any).queue.queueTiming.mock.calls[0][0].name).toMatch(
+      (tracer as any).recordSpanTiming(span, {}, prefix);
+      expect((tracer as any).reporter.reportTiming.mock.calls[0][0].name).toMatch(
         new RegExp(prefix),
       );
+    });
+  });
+
+  describe(`globalProperties`, () => {
+    it(`works if you provide it with a function`, () => {
+      const globalProperties = { baz: 'quux' };
+      (tracer as any).config.globalProperties = () => globalProperties;
+      (tracer as any).recordSpanTiming(span);
+      expect((tracer as any).reporter.timings.buffer[0].tags).toMatchObject(globalProperties);
+    });
+
+    it(`works if you provide it with an object`, () => {
+      const globalProperties = { baz: 'quux' };
+      (tracer as any).config.globalProperties = globalProperties;
+      (tracer as any).recordSpanTiming(span);
+      expect((tracer as any).reporter.timings.buffer[0].tags).toMatchObject(globalProperties);
     });
   });
 });

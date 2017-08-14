@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import * as lolex from 'lolex';
 
 import Span from '../src/Span';
 
@@ -89,8 +90,8 @@ describe(`Span`, () => {
       span.setError(error);
     });
 
-    it(`sets the 'error' property to true`, () => {
-      expect(span.error).toBe(true);
+    it(`sets the 'error' property to '1'`, () => {
+      expect(span.error).toBe(1);
     });
 
     it(`adds the error metadata to the 'metadata' property`, () => {
@@ -177,6 +178,36 @@ describe(`Span`, () => {
       _.forIn(_.omit(Span.prototype, 'hasEnded'), (fn, key) => {
         expect(_.invoke(Span.NoOp, key)).toBe(Span);
       });
+    });
+  });
+
+  describe(`duration`, () => {
+    let clock: lolex;
+
+    beforeAll(() => {
+      clock = lolex.install();
+    });
+
+    beforeEach(() => {
+      span = new Span(resource, name, service);
+    });
+
+    afterAll(() => {
+      clock.uninstall();
+    });
+
+    it(`returns the correct duration`, () => {
+      clock.tick(1337);
+      span.end();
+      expect(span.duration).toBeCloseTo(1337);
+    });
+
+    it(`takes the longer time in an unbalanced span`, () => {
+      clock.tick(1000);
+      span.end();
+      clock.tick(1000);
+      span.end();
+      expect(span.duration).toBeCloseTo(2000);
     });
   });
 });

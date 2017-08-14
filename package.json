@@ -6,8 +6,15 @@
   "repository": "convoyinc/tracer",
   "homepage": "https://github.com/convoyinc/tracer",
   "bugs": "https://github.com/convoyinc/tracer/issues",
-  "keywords": ["tracing", "browser", "node", "datadog"],
-  "files": ["lib"],
+  "keywords": [
+    "tracing",
+    "browser",
+    "node",
+    "datadog"
+  ],
+  "files": [
+    "lib"
+  ],
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
@@ -23,6 +30,7 @@
   },
   "dependencies": {
     "@streammedev/perfnow": "^2.1.0",
+    "circularbuffer": "^0.1.0",
     "lodash": "^4.17.4",
     "moment-timezone": "^0.5.13",
     "protobind": "^1.0.7",
@@ -37,6 +45,7 @@
     "coveralls": "^2.0.0",
     "jest": "^20.0.4",
     "jest-environment-node-debug": "^2.0.0",
+    "lolex": "^2.1.2",
     "prettier": "^1.5.2",
     "replication": "0.0.7",
     "rimraf": "^2.0.0",
@@ -52,11 +61,22 @@
       ".(ts)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "/__tests__/.*\\.ts$",
-    "moduleFileExtensions": ["ts", "js"],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
     "testEnvironment": "node",
     "collectCoverage": true,
     "mapCoverage": true,
-    "collectCoverageFrom": ["src/**/*.ts", "!src/interfaces.ts", "!src/index.ts"],
-    "coverageReporters": ["html", "lcov", "text"]
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/interfaces.ts",
+      "!src/index.ts"
+    ],
+    "coverageReporters": [
+      "html",
+      "lcov",
+      "text"
+    ]
   }
 }

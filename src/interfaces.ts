@@ -25,15 +25,15 @@ export interface SpanMetrics {
 
 export type FlushFunction = (timings: Timing[], traces: Span[]) => any;
 
-export type AnnotatorFunction = (span: Span, ...args: any[]) => void;
+export interface Logger {
+  info(...args: any[]): void;
+  warn(...args: any[]): void;
+  error(...args: any[]): void;
+}
 
-export interface TraceFuncArgs {
-  tracer: Tracer;
-  context: any;
-  name: string;
-  resource: string;
-  service?: string;
-  annotator?: AnnotatorFunction;
+export interface AbstractReporter {
+  reportTiming(timing: Timing): any;
+  reportTrace(trace: Span): any;
 }
 
 export interface TracerConfiguration {
@@ -44,5 +44,7 @@ export interface TracerConfiguration {
   maxTimingsBatchSize?: number;
   maxTracesBatchSize?: number;
   globalProperties?: { [key: string]: string } | Function;
+  logger?: Logger;
   flushHandler: FlushFunction;
+  reporter: null | AbstractReporter;
 }

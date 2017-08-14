@@ -35,13 +35,6 @@ describe(`traceFunc`, () => {
     expect(tracer.get().children).toHaveLength(1);
   });
 
-  it(`doesn't try to end the span if it's a noop`, () => {
-    tracer.startNestedSpan = () => Span.NoOp;
-    traceFn();
-    context.someFn();
-    expect(tracer.get().children).toHaveLength(0);
-  });
-
   it(`doesn't create a span if there isn't currently an active trace`, () => {
     const trace = tracer.get();
     (tracer as any).get = () => undefined;

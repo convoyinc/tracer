@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@deployable/ringbuffer@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@deployable/ringbuffer/-/ringbuffer-0.3.1.tgz#5ca2b501beac731eac0b490b01b240feff5f4553"
+
 "@streammedev/perfnow@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@streammedev/perfnow/-/perfnow-2.1.0.tgz#a38f4b920f289ad554dd6f267f5262d62d3ab586"
@@ -993,6 +997,10 @@ chokidar@^1.6.1:
 ci-info@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-1.0.0.tgz#dc5285f2b4e251821683681c381c3388f46ec534"
+
+circularbuffer@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/circularbuffer/-/circularbuffer-0.1.0.tgz#33ec7b8d0c4d9dfda3686ed6e1efc62a0f352add"
 
 cliui@^2.1.0:
   version "2.1.0"
@@ -2109,6 +2117,10 @@ lodash@^4.0.0, lodash@^4.14.0, lodash@^4.17.4, lodash@^4.2.0:
 log-driver@1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/log-driver/-/log-driver-1.2.5.tgz#7ae4ec257302fd790d557cb10c97100d857b0056"
+
+lolex@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/lolex/-/lolex-2.1.2.tgz#2694b953c9ea4d013e5b8bfba891c991025b2629"
 
 longest@^1.0.1:
   version "1.0.1"
