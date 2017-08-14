@@ -15,6 +15,8 @@ export interface Timing {
   tags?: { [key: string]: string };
 }
 
+export type Span = typeof Span;
+
 export interface SpanMeta {
   [key: string]: string;
 }
