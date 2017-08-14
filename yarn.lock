@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@streammedev/perfnow@^2.1.0":
+"@streammedev/perfnow@^2.0.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@streammedev/perfnow/-/perfnow-2.1.0.tgz#a38f4b920f289ad554dd6f267f5262d62d3ab586"
 
@@ -2203,7 +2203,7 @@ minimist@~0.0.1:
   dependencies:
     minimist "0.0.8"
 
-moment-timezone@^0.5.13:
+moment-timezone@^0.5.0:
   version "0.5.13"
   resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.13.tgz#99ce5c7d827262eb0f1f702044177f60745d7b90"
   dependencies:
@@ -2497,7 +2497,7 @@ process-nextick-args@~1.0.6:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-1.0.7.tgz#150e20b756590ad3f91093f25a4f2ad8bff30ba3"
 
-protobind@^1.0.7:
+protobind@^1.0.0:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/protobind/-/protobind-1.0.7.tgz#707a0a7f27035f86a8f6d29cc0605ad4dcd927a9"
   dependencies:
@@ -3095,7 +3095,7 @@ util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
 
-uuid@^3.0.0, uuid@^3.1.0:
+uuid@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
 
