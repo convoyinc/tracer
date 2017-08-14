@@ -1,0 +1,182 @@
+import * as _ from 'lodash';
+
+import Span from '../src/Span';
+
+describe(`Span`, () => {
+  let name, resource, service, span: Span;
+  beforeEach(() => {
+    name = 'SpanName';
+    resource = 'SomeFn';
+    service = 'SomeService';
+    span = new Span(resource, name, service);
+  });
+
+  describe(`#constructor`, () => {
+    it(`creates a new Span instance with the provided name, resource and service`, () => {
+      expect(span.name).toBe(name);
+      expect(span.resource).toBe(resource);
+      expect(span.service).toBe(service);
+    });
+
+    it(`sets the start time when it initializes the span`, () => {
+      expect(span.start).toBeGreaterThan(0);
+    });
+  });
+
+  describe(`newChild`, () => {
+    it(`adds the new child span to the parent's 'children' array`, () => {
+      span.newChild(resource, name, service);
+      expect(span.children).toHaveLength(1);
+      expect(span.children[0].name).toBe(name);
+    });
+  });
+
+  describe(`setMeta`, () => {
+    let meta;
+    beforeEach(() => {
+      meta = { foo: 'bar' };
+      span.setMeta(meta);
+    });
+
+    it(`adds the metadata to the 'meta' property`, () => {
+      expect(span.meta).toMatchObject(meta);
+    });
+
+    it(`adds the metadata to any existing metadata`, () => {
+      const newMeta = { bar: 'foo' };
+      span.setMeta(newMeta);
+      expect(span.meta).toMatchObject({ ...meta, ...newMeta });
+    });
+
+    it(`removes metadata with non-primitive values`, () => {
+      const nonPrimitive = { bar: { baz: 'qux' } };
+      span.setMeta(nonPrimitive as any);
+      expect(span.meta).toMatchObject(meta);
+      expect(span.meta).not.toMatchObject(nonPrimitive);
+    });
+
+    it(`doesn't add anything if you pass it an empty object`, () => {
+      const emptyMeta = {};
+      span.meta = {};
+      span.setMeta(emptyMeta);
+      expect(span.meta).toMatchObject(emptyMeta);
+    });
+  });
+
+  describe(`setMetrics`, () => {
+    let metrics;
+    beforeEach(() => {
+      metrics = { foo: 1 };
+      span.setMetrics(metrics);
+    });
+
+    it(`adds the metrics to the 'metrics' property`, () => {
+      expect(span.metrics).toMatchObject(metrics);
+    });
+
+    it(`adds the metrics to any existing metrics`, () => {
+      const newMetrics = { bar: 2 };
+      span.setMetrics(newMetrics);
+      expect(span.metrics).toMatchObject({ ...metrics, ...newMetrics });
+    });
+  });
+
+  describe(`setError`, () => {
+    let error, errorMessage;
+    beforeEach(() => {
+      errorMessage = 'Some foo error';
+      error = new Error(errorMessage);
+      span.setError(error);
+    });
+
+    it(`sets the 'error' property to true`, () => {
+      expect(span.error).toBe(true);
+    });
+
+    it(`adds the error metadata to the 'metadata' property`, () => {
+      expect(span.meta).toMatchObject({
+        'error.name': 'Error',
+        'error.message': errorMessage,
+      });
+    });
+  });
+
+  describe(`end`, () => {
+    it(`records the duration`, () => {
+      span.end();
+      expect(span.duration).toBeGreaterThan(0);
+    });
+
+    it(`allows you to pass it a custom end time`, () => {
+      const customEndTime = span.start + 1000;
+      span.end(customEndTime);
+      expect(span.duration).toBeCloseTo(1000);
+    });
+
+    it(`sets the 'unbalanced' meta property to true if we've already ended`, () => {
+      span.end();
+      expect(span.hasEnded).toBe(true);
+      span.end();
+      expect(span.meta).toMatchObject({
+        'span.unbalanced': 'true',
+      });
+    });
+
+    it(`ends all child spans that aren't already ended`, () => {
+      const children = [
+        new Span(resource, name, service).end(),
+        new Span(resource, name, service),
+        new Span(resource, name, service),
+      ];
+      span.children = children;
+      span.end();
+      _.forEach(span.children, child => {
+        expect(child.hasEnded).toBe(true);
+      });
+    });
+  });
+
+  describe(`removeShortSpans`, () => {
+    let thresholdMs;
+    beforeEach(() => {
+      thresholdMs = 5;
+      const children = _.times(5, () => _.cloneDeep(span));
+      _.forEach(children, child => (child.duration = 6));
+      children[0].duration = 3;
+      span.children = children;
+    });
+
+    it(`removes all spans with a duration not exceeding the threshold`, () => {
+      span.removeShortSpans(thresholdMs);
+      expect(span.children).toHaveLength(4);
+    });
+
+    it(`doesn't remove any children if you don't provide it with a threshold`, () => {
+      (span as any).removeShortSpans();
+      expect(span.children).toHaveLength(5);
+    });
+  });
+
+  describe(`hasEnded`, () => {
+    it(`returns true if the span has ended`, () => {
+      span.end();
+      expect(span.hasEnded).toBe(true);
+    });
+
+    it(`returns false if the span hasn't ended`, () => {
+      expect(span.hasEnded).toBe(false);
+    });
+  });
+
+  describe(`NoOp`, () => {
+    it(`returns true for 'hasEnded'`, () => {
+      expect(Span.NoOp.hasEnded).toBe(true);
+    });
+
+    it(`returns the class for every other property`, () => {
+      _.forIn(_.omit(Span.prototype, 'hasEnded'), (fn, key) => {
+        expect(_.invoke(Span.NoOp, key)).toBe(Span);
+      });
+    });
+  });
+});
