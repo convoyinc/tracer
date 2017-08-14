@@ -1,13 +1,20 @@
 {
   "name": "@convoy/tracer",
-  "version": "0.0.1",
+  "version": "0.0.37",
   "description": "A tracing library",
   "license": "Apache-2.0",
   "repository": "convoyinc/tracer",
   "homepage": "https://github.com/convoyinc/tracer",
   "bugs": "https://github.com/convoyinc/tracer/issues",
-  "keywords": ["tracing", "browser", "node", "datadog"],
-  "files": ["lib"],
+  "keywords": [
+    "tracing",
+    "browser",
+    "node",
+    "datadog"
+  ],
+  "files": [
+    "lib"
+  ],
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
@@ -52,11 +59,22 @@
       ".(ts)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "/__tests__/.*\\.ts$",
-    "moduleFileExtensions": ["ts", "js"],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
     "testEnvironment": "node",
     "collectCoverage": true,
     "mapCoverage": true,
-    "collectCoverageFrom": ["src/**/*.ts", "!src/interfaces.ts", "!src/index.ts"],
-    "coverageReporters": ["html", "lcov", "text"]
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/interfaces.ts",
+      "!src/index.ts"
+    ],
+    "coverageReporters": [
+      "html",
+      "lcov",
+      "text"
+    ]
   }
 }
