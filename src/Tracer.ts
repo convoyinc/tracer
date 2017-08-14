@@ -1,9 +1,9 @@
 import * as _ from 'lodash';
 import * as autobind from 'protobind';
 
-import Queue from './Queue';
+import Reporter from './Reporter';
 import Span from './Span';
-import { TracerConfiguration } from './interfaces';
+import { TracerConfiguration, AbstractReporter } from './interfaces';
 
 export const defaultConfig: TracerConfiguration = {
   maxTimingsBatchSize: 50,
@@ -12,16 +12,19 @@ export const defaultConfig: TracerConfiguration = {
   flushIntervalSeconds: 30,
   minimumDurationMs: 10,
   fullTraceSampleRate: 1 / 25,
+  globalProperties: {},
+  logger: console,
   flushHandler: _.noop,
+  reporter: null,
 };
 
 export default class Tracer {
   private spanStack: Span[] = [];
-  private queue: Queue;
+  private reporter: AbstractReporter;
 
   constructor(private config: TracerConfiguration) {
     this.config = _.defaults(config, defaultConfig);
-    this.queue = new Queue(this.config);
+    this.reporter = this.config.reporter || new Reporter(this.config);
 
     autobind(this);
   }
@@ -104,7 +107,7 @@ export default class Tracer {
 
   public recordTrace(trace: Span) {
     if (Math.random() <= this.config.fullTraceSampleRate) {
-      this.queue.queueTrace(trace);
+      this.reporter.reportTrace(trace);
     }
 
     /**
@@ -114,27 +117,34 @@ export default class Tracer {
      */
     this.recordSpanTiming(trace);
     for (const child of trace.children) {
-      this.recordSpanTiming(
-        child,
-        { resource: trace.resource },
-        `${trace.service}.${trace.name}.`,
-      );
+      this.recordSpanTiming(child, { resource: trace.resource }, `${trace.service}.${trace.name}.`);
     }
   }
 
-  public recordSpanTiming(
+  private recordSpanTiming(
     { name, service, resource, duration, meta }: Span,
     extraMeta = {},
     prefix = '',
   ) {
-    this.queue.queueTiming({
+    this.reporter.reportTiming({
       name: `${prefix}${service}.${name}`,
       duration,
-      tags: {
+      tags: this.sanitizeTags({
         resource,
         ...meta,
         ...extraMeta,
-      },
+        ...this.getGlobalProperties(),
+      }),
     });
+  }
+
+  public sanitizeTags(tags: any) {
+    return _(tags).omitBy(_.isObject).mapValues(_.toString).value();
+  }
+
+  public getGlobalProperties() {
+    return _.isFunction(this.config.globalProperties)
+      ? this.config.globalProperties()
+      : this.config.globalProperties;
   }
 }

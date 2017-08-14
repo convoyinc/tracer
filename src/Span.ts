@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
-
-import now = require('@streammedev/perfnow');
+import * as now from '@streammedev/perfnow';
 
 import { SpanMeta, SpanMetrics } from './interfaces';
 
@@ -15,7 +14,7 @@ export default class Span {
   public meta: SpanMeta = {};
   public metrics?: SpanMetrics;
   public children: Span[] = [];
-  public error: boolean | number = false;
+  public error: number = 0;
 
   constructor(public resource: string, public name: string, public service?: string) {
     this.start = now();
@@ -40,7 +39,7 @@ export default class Span {
   }
 
   public setError(error: Error) {
-    this.error = true;
+    this.error = 1;
 
     this.setMeta({
       'error.name': error.name,
