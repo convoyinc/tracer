@@ -994,9 +994,9 @@ ci-info@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-1.0.0.tgz#dc5285f2b4e251821683681c381c3388f46ec534"
 
-circularbuffer@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/circularbuffer/-/circularbuffer-0.1.0.tgz#33ec7b8d0c4d9dfda3686ed6e1efc62a0f352add"
+circularbuffer@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/circularbuffer/-/circularbuffer-0.1.1.tgz#2dd6e873a35f38a9e9018d625ed13206b8edac18"
 
 cliui@^2.1.0:
   version "2.1.0"
