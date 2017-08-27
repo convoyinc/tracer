@@ -29,7 +29,7 @@ const tracer = new Tracer({
   flushHandler:FlushFunction = (timings, traces) => {
     // Do something here
   },
-}: TracerConfiguration);
+});
 ```
 
 You can also use a custom reporter if you'd like to manage the queueing and reporting yourself:
