@@ -4,7 +4,19 @@ import * as uuid from 'uuid';
 import CircularBuffer from 'circularbuffer';
 
 import Span from './Span';
-import { AbstractReporter, TracerConfiguration, Timing } from './interfaces';
+import { AbstractReporter, Timing } from './interfaces';
+import { ReporterConfiguration } from './index';
+
+export const defaultReporterConfig:ReporterConfiguration = {
+  maxTimingsBatchSize: 50,
+  maxTracesBatchSize: 20,
+  evaluateFlushIntervalSeconds: 5,
+  flushIntervalSeconds: 30,
+  logger: console,
+  flushHandler: _.noop,
+}
+
+// TODO: rIC not setInterval
 
 export default class Reporter implements AbstractReporter {
   private interval: NodeJS.Timer;
@@ -13,10 +25,11 @@ export default class Reporter implements AbstractReporter {
   private isFlushing = false;
   private lastFlush: Date | null = null;
 
-  constructor(private config: TracerConfiguration) {
+  constructor(private config: ReporterConfiguration) {
+    this.config = _.defaults(config, defaultReporterConfig);
     this.interval = setInterval(
       this.flushIfNeeded.bind(this),
-      +moment.duration(config.evaluateFlushIntervalSeconds, 'seconds'),
+      +moment.duration(this.config.evaluateFlushIntervalSeconds, 'seconds'),
     );
   }
 

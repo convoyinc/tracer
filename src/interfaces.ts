@@ -41,12 +41,15 @@ export interface AbstractReporter {
 export interface TracerConfiguration {
   minimumDurationMs?: number;
   fullTraceSampleRate?: number;
-  flushIntervalSeconds?: number;
-  evaluateFlushIntervalSeconds?: number;
+  globalProperties?: { [key: string]: string } | Function;
+  reporter: null | AbstractReporter;
+}
+
+export interface ReporterConfiguration {
   maxTimingsBatchSize?: number;
   maxTracesBatchSize?: number;
-  globalProperties?: { [key: string]: string } | Function;
+  evaluateFlushIntervalSeconds?: number;
+  flushIntervalSeconds?: number;
   logger?: Logger;
   flushHandler: FlushFunction;
-  reporter: null | AbstractReporter;
 }
