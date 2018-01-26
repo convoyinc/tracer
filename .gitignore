@@ -1,0 +1,11 @@
+# misc
+.DS_Store
+
+# npm
+npm-debug.log*
+node_modules/
+
+# build artifacts
+build/
+dist/
+lib/
