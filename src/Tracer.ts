@@ -4,6 +4,7 @@ import * as autobind from 'protobind';
 import Reporter from './Reporter';
 import Span from './Span';
 import { TracerConfiguration, AbstractReporter } from './interfaces';
+import { pseudoUuid } from './utils';
 
 export const defaultConfig: TracerConfiguration = {
   maxTimingsBatchSize: 50,
@@ -95,6 +96,7 @@ export default class Tracer {
     this.spanStack = [];
     currentTrace.end();
     currentTrace.removeShortSpans(this.config.minimumDurationMs);
+    currentTrace.setTraceId(pseudoUuid());
     this.recordTrace(currentTrace);
 
     return currentTrace;
