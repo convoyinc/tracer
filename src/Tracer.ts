@@ -149,4 +149,9 @@ export default class Tracer {
       ? this.config.globalProperties()
       : this.config.globalProperties;
   }
+
+  public getTraceId() {
+    const currentTrace = this.get();
+    return _.get(currentTrace, 'traceId');
+  }
 }

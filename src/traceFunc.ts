@@ -52,15 +52,6 @@ export function traceFunc({
   };
 }
 
-// Benefits:
-//  Datadog APM support (includes resource, service, etc)
-//  Context object (avoid CLS)
-
-// TODO: Node support
-//      Use moduleName in name on Node
-//      cls support?
-//      logging (chalk)
-
 export function createTraceDecorator({
   service: defaultService,
   tracerConfig,
@@ -163,7 +154,7 @@ function traceFunction({
   contextArgumentPosition:number,
   args:any[],
   tracedFunction:Function,
-  name:string,
+  name:string|((tracedFunction:Function) => string),
   annotator:(span:Span, ...args:any[]) => void,
   tags?:Tags,
   context?: Context,
@@ -185,7 +176,9 @@ function traceFunction({
 
   args = context ? args.slice(0, args.length - 1) : args;
   resource = resource || (context && context.resource) || tracedFunction.name;
-  name = name || tracedFunction.name;
+  name = typeof name === 'function'
+    ? name(tracedFunction) // Allow function for moduleName lookup in Node
+    : name || tracedFunction.name;
 
   let span:Span;
   if (context.tracer) {
