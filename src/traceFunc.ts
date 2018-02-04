@@ -20,7 +20,6 @@ export interface TraceFuncArgs {
 export interface Context {
   contextObject: true,
   tracer?: Tracer,
-  resource?: string,
 }
 
 export interface Tags {
@@ -175,17 +174,17 @@ function traceFunction({
   }
 
   args = context ? args.slice(0, args.length - 1) : args;
-  resource = resource || (context && context.resource) || tracedFunction.name;
   name = typeof name === 'function'
     ? name(tracedFunction) // Allow function for moduleName lookup in Node
     : name || tracedFunction.name;
 
   let span:Span;
   if (context.tracer) {
+    resource = resource || context.tracer.get().resource;
     span = context.tracer.startNestedSpan(resource, name, service);
   } else {
     context.tracer = new Tracer(tracerConfig);
-    context.resource = resource;
+    resource = resource || tracedFunction.name;
     span = context.tracer.start(resource, name, service);
   }
 
