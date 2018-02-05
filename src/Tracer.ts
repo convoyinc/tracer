@@ -93,10 +93,11 @@ export default class Tracer {
     const currentTrace = this.get();
     if (!currentTrace) return;
 
+    const traceId = this.config.traceId || pseudoUuid();
     this.spanStack = [];
     currentTrace.end();
     currentTrace.removeShortSpans(this.config.minimumDurationMs);
-    currentTrace.setTraceId(pseudoUuid());
+    currentTrace.setTraceId(traceId);
     this.recordTrace(currentTrace);
 
     return currentTrace;

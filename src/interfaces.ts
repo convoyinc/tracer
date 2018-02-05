@@ -49,4 +49,5 @@ export interface TracerConfiguration {
   logger?: Logger;
   flushHandler: FlushFunction;
   reporter: null | AbstractReporter;
+  traceId?: number;
 }
