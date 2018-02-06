@@ -3,19 +3,13 @@ import * as autobind from 'protobind';
 
 import Reporter from './Reporter';
 import Span from './Span';
-import { TracerConfiguration, AbstractReporter } from './interfaces';
+import { ReporterConfiguration, TracerConfiguration, AbstractReporter } from './interfaces';
 import { pseudoUuid } from './utils';
 
 export const defaultConfig: TracerConfiguration = {
-  maxTimingsBatchSize: 50,
-  maxTracesBatchSize: 20,
-  evaluateFlushIntervalSeconds: 5,
-  flushIntervalSeconds: 30,
   minimumDurationMs: 10,
   fullTraceSampleRate: 1 / 25,
   globalProperties: {},
-  logger: console,
-  flushHandler: _.noop,
   reporter: null,
 };
 
@@ -23,7 +17,7 @@ export default class Tracer {
   private spanStack: Span[] = [];
   private reporter: AbstractReporter;
 
-  constructor(private config: TracerConfiguration) {
+  constructor(private config: TracerConfiguration & ReporterConfiguration) {
     this.config = _.defaults(config, defaultConfig);
     this.reporter = this.config.reporter || new Reporter(this.config);
 
