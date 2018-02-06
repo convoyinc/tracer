@@ -18,7 +18,7 @@ export interface TraceFuncArgs {
 }
 
 export interface Context {
-  contextObject: true,
+  _contextObject: true,
   tracer?: Tracer,
 }
 
@@ -166,10 +166,10 @@ function traceFunction({
   context = context || args[contextArgumentPosition];
 
   if (context === undefined) {
-    context = { contextObject: true };
+    context = { _contextObject: true };
   }
 
-  if (!context || !context.contextObject) {
+  if (!context || !context._contextObject) {
     throw new Error(`tracing requires the argument at position ${contextArgumentPosition} to be a context object`);
   }
 
