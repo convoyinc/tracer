@@ -76,8 +76,8 @@ export function createTraceDecorator({
   } = {}) {
     return (_target:any, _key?:string, descriptor?:PropertyDescriptor):any => {
       const tracedFunction = descriptor.value;
-      descriptor.value = (...args:any[]) => {
-        return traceFunction({
+      descriptor.value = function traceDecorator(...args:any[]) {
+        return traceFunction.call(this, {
           resource,
           service: service || defaultService,
           tracerConfig,
@@ -155,7 +155,7 @@ function traceFunction({
   contextArgumentPosition:number,
   args:any[],
   tracedFunction:Function,
-  name:string|((tracedFunction:Function) => string),
+  name:string,
   annotator:(span:Span, ...args:any[]) => void,
   tags?:Tags,
   context?: Context,
@@ -176,9 +176,7 @@ function traceFunction({
   }
 
   args = context ? args.slice(0, args.length - 1) : args;
-  name = typeof name === 'function'
-    ? name(tracedFunction) // Allow function for moduleName lookup in Node
-    : name || tracedFunction.name;
+  name = name || tracedFunction.name;
 
   let span:Span|typeof Span.NoOp;
   if (context.tracer) {
@@ -197,7 +195,7 @@ function traceFunction({
   // show up as coming from the instrumented call).
   let result;
   try {
-    result = tracedFunction(...args, context);
+    result = tracedFunction.call(this, ...args, context);
   } catch (error) {
     span.setError(error);
     postFunction({ span, context, annotator, tags, args });
