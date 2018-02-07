@@ -5,6 +5,7 @@ import * as decorators from './decorators';
 import Span from './Span';
 import Tracer from './Tracer';
 import { TracerConfiguration } from './interfaces';
+import { ReporterConfiguration } from './index';
 
 export type AnnotatorFunction = (span: Span, ...args: any[]) => void;
 
@@ -57,7 +58,7 @@ export function createTraceDecorator({
   contextArgumentPosition = 1,
 }:{
   service:string,
-  tracerConfig:TracerConfiguration,
+  tracerConfig:TracerConfiguration & ReporterConfiguration,
   contextArgumentPosition:number,
 }) {
   return function traceDecorator({
@@ -98,7 +99,7 @@ export function createTraceFunction({
   contextArgumentPosition = 1,
 }:{
   service:string,
-  tracerConfig:TracerConfiguration,
+  tracerConfig:TracerConfiguration & ReporterConfiguration,
   contextArgumentPosition:number,
 }) {
   return function trace({
@@ -149,7 +150,7 @@ function traceFunction({
 }:{
   resource:string,
   service:string,
-  tracerConfig:TracerConfiguration,
+  tracerConfig:TracerConfiguration & ReporterConfiguration,
   contextArgumentPosition:number,
   args:any[],
   tracedFunction:Function,
@@ -178,7 +179,7 @@ function traceFunction({
     ? name(tracedFunction) // Allow function for moduleName lookup in Node
     : name || tracedFunction.name;
 
-  let span:Span;
+  let span:Span|typeof Span.NoOp;
   if (context.tracer) {
     resource = resource || context.tracer.get().resource;
     span = context.tracer.startNestedSpan(resource, name, service);

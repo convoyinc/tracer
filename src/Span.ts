@@ -89,7 +89,7 @@ export default class Span {
     end: () => Span,
     setMeta: () => Span,
     newChild: () => Span,
-    setError: () => Span,
+    setError: (error?:Error) => Span,
     setMetrics: () => Span,
     removeShortSpans: () => Span,
     get hasEnded() {
