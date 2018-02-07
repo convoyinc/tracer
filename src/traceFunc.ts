@@ -231,7 +231,6 @@ function postFunction({
   args?:any[],
 }) {
   if (span && span !== Span.NoOp) {
-    span.end();
     if (tags) {
       span.setMeta(tags);
     }
@@ -241,6 +240,8 @@ function postFunction({
   }
   if (context.tracer.get() === span) {
     context.tracer.end();
+  } else if (span && span !== Span.NoOp) {
+    span.end();
   }
 }
 
