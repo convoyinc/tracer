@@ -1,7 +1,5 @@
 import * as _ from 'lodash';
 
-import * as decorators from './decorators';
-
 import Span from './Span';
 import Tracer from './Tracer';
 import { TracerConfiguration } from './interfaces';
@@ -76,20 +74,23 @@ export function createTraceDecorator({
     tags?:Tags,
     context?: Context,
   } = {}) {
-    return decorators.makeMethodDecorator((tracedFunction:Function, ...args:any[]) => {
-      return traceFunction({
-        resource,
-        service: service || defaultService,
-        tracerConfig,
-        contextArgumentPosition,
-        name,
-        annotator,
-        tags,
-        context,
-        args,
-        tracedFunction,
-      });
-    });
+    return (_target:any, _key?:string, descriptor?:PropertyDescriptor):any => {
+      const tracedFunction = descriptor.value;
+      descriptor.value = (...args:any[]) => {
+        return traceFunction({
+          resource,
+          service: service || defaultService,
+          tracerConfig,
+          contextArgumentPosition,
+          name,
+          annotator,
+          tags,
+          context,
+          args,
+          tracedFunction,
+        });
+      };
+    };
   };
 }
 
