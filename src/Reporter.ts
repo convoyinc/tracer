@@ -15,21 +15,15 @@ export const defaultReporterConfig:ReporterConfiguration = {
   flushHandler: _.noop,
 }
 
-// TODO: rIC not setInterval
-
 export default class Reporter implements AbstractReporter {
-  private interval: NodeJS.Timer;
   private traces = new CircularBuffer<Span>(100);
   private timings = new CircularBuffer<Timing>(100);
   private isFlushing = false;
   private lastFlush: Date | null = null;
+  private isPending = false;
 
   constructor(private config: ReporterConfiguration) {
     this.config = _.defaults(config, defaultReporterConfig);
-    this.interval = setInterval(
-      this.flushIfNeeded.bind(this),
-      +moment.duration(this.config.evaluateFlushIntervalSeconds, 'seconds'),
-    );
   }
 
   private log = this.config.logger;
@@ -40,23 +34,29 @@ export default class Reporter implements AbstractReporter {
     }
 
     this.timings.enq(timing);
+    this.requestFlush();
   }
 
   public reportTrace(trace: Span) {
     this.traces.enq(trace);
+    this.requestFlush();
+  }
+
+  private requestFlush() {
+    if (!this.isPending) {
+      this.isPending = true;
+      idleCallback(
+        this.flushIfNeeded.bind(this),
+        +moment.duration(this.config.evaluateFlushIntervalSeconds, 'seconds'),
+      );
+    }
   }
 
   public async flushIfNeeded() {
+    this.isPending = false;
     if (this.isFlushing || !this.haveItemsToFlush) return;
 
-    if (
-      !this.lastFlush ||
-      moment(this.lastFlush).isBefore(
-        moment().subtract(this.config.flushIntervalSeconds, 'seconds'),
-      )
-    ) {
-      await this.flush();
-    }
+    await this.flush();
   }
 
   public startFlush() {
@@ -110,4 +110,11 @@ export default class Reporter implements AbstractReporter {
   get haveItemsToFlush() {
     return !!(this.traces.size || this.timings.size);
   }
+}
+
+function idleCallback(callback:(...args:any[]) => void, timeout:number) {
+  if (global.requestIdleCallback) {
+    return global.requestIdleCallback(callback, { timeout });
+  }
+  return setTimeout(callback, timeout);
 }
