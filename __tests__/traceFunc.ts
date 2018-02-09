@@ -1,5 +1,5 @@
 import Tracer from '../src/Tracer';
-import traceFunc from '../src/traceFunc';
+import { traceFunc } from '../src/traceFunc';
 import Span from '../src/Span';
 
 describe(`traceFunc`, () => {

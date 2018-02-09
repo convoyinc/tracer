@@ -42,7 +42,7 @@ export interface TracerConfiguration {
   minimumDurationMs?: number;
   fullTraceSampleRate?: number;
   globalProperties?: { [key: string]: string } | Function;
-  reporter: null | AbstractReporter;
+  reporter?: null | AbstractReporter;
   traceId?: number;
 }
 

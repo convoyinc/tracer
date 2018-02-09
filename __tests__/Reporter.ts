@@ -2,17 +2,18 @@ import * as _ from 'lodash';
 import * as moment from 'moment-timezone';
 import * as uuid from 'uuid';
 
-import Reporter from '../src/Reporter';
+import Reporter, { defaultReporterConfig } from '../src/Reporter';
 import Span from '../src/Span';
 import { defaultConfig } from '../src/Tracer';
-import { Timing, TracerConfiguration } from '../src/interfaces';
+import { Timing, TracerConfiguration, ReporterConfiguration } from '../src/interfaces';
 
 describe(`Reporter`, () => {
-  let reporter: Reporter, config: TracerConfiguration, timing: Timing, trace: Span;
+  let reporter: Reporter, config: TracerConfiguration & ReporterConfiguration, timing: Timing, trace: Span;
   beforeEach(() => {
     jest.useFakeTimers();
     config = {
       ...defaultConfig,
+      ...defaultReporterConfig,
       globalProperties: { foo: 'bar' },
       flushHandler: jest.fn(),
     };
@@ -155,12 +156,12 @@ describe(`Reporter`, () => {
   it(`flushes at the correct frequency`, () => {
     reporter.flush = jest.fn();
 
-    (reporter as any).timings.buffer = [timing];
-    (reporter as any).traces.buffer = [trace];
+    reporter.reportTiming(timing);
+    reporter.reportTrace(trace);
     (reporter as any).lastFlush = null;
     jest.runTimersToTime((reporter as any).config.evaluateFlushIntervalSeconds * 1000 * 5);
 
-    expect(reporter.flush).toHaveBeenCalledTimes(5);
+    expect(reporter.flush).toHaveBeenCalledTimes(1);
   });
 
   it(`logs any errors encountered while flushing`, async () => {

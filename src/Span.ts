@@ -92,6 +92,7 @@ export default class Span {
     setError: (error?:Error) => Span,
     setMetrics: () => Span,
     removeShortSpans: () => Span,
+    setTraceId: () => Span,
     get hasEnded() {
       return true;
     },
