@@ -56,7 +56,7 @@ export function createTraceDecorator({
   contextArgumentPosition = 1,
 }:{
   service:string,
-  tracerConfig:TracerConfiguration & ReporterConfiguration,
+  tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
 }) {
   return function traceDecorator({
@@ -100,7 +100,7 @@ export function createTraceFunction({
   contextArgumentPosition = 1,
 }:{
   service:string,
-  tracerConfig:TracerConfiguration & ReporterConfiguration,
+  tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
 }) {
   return function trace({
@@ -151,7 +151,7 @@ function traceFunction({
 }:{
   resource:string,
   service:string,
-  tracerConfig:TracerConfiguration & ReporterConfiguration,
+  tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
   args:any[],
   tracedFunction:Function,
@@ -176,6 +176,7 @@ function traceFunction({
   }
 
   args = context ? args.slice(0, args.length - 1) : args;
+  console.log(name, tracedFunction, tracedFunction.name);
   name = name || tracedFunction.name;
 
   let span:Span|typeof Span.NoOp;

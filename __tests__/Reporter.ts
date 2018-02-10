@@ -8,7 +8,7 @@ import { defaultConfig } from '../src/Tracer';
 import { Timing, TracerConfiguration, ReporterConfiguration } from '../src/interfaces';
 
 describe(`Reporter`, () => {
-  let reporter: Reporter, config: TracerConfiguration & ReporterConfiguration, timing: Timing, trace: Span;
+  let reporter: Reporter, config: TracerConfiguration, timing: Timing, trace: Span;
   beforeEach(() => {
     jest.useFakeTimers();
     config = {

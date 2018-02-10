@@ -17,9 +17,9 @@ export default class Tracer {
   private spanStack: Span[] = [];
   private reporter: AbstractReporter;
 
-  constructor(private config: TracerConfiguration & ReporterConfiguration) {
+  constructor(private config: TracerConfiguration) {
     this.config = _.defaults(config, defaultConfig);
-    this.reporter = this.config.reporter || new Reporter(this.config);
+    this.reporter = this.config.reporter || new Reporter(this.config as any);
 
     autobind(this);
   }
