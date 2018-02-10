@@ -1,6 +1,11 @@
-import Tracer from '../src/Tracer';
-import traceFunc from '../src/traceFunc';
-import Span from '../src/Span';
+import {
+  Tracer,
+  Reporter,
+  Span,
+  traceFunc,
+  createTraceDecorator,
+  createTraceFunction,
+} from '../src';
 
 describe(`traceFunc`, () => {
   let tracer: Tracer, resource, name, service, context;
@@ -60,5 +65,46 @@ describe(`traceFunc`, () => {
     traceFunc({ tracer, context, name: 'someFn', service, resource, annotator } as any);
     context.someFn();
     expect(tracer.get().children[0].meta).toMatchObject(meta);
+  });
+});
+
+describe(`createTraceDecorator`, () => {
+  let reporter: Reporter, trace, mock;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mock = jest.fn();
+    reporter = new Reporter({ flushHandler: mock });
+
+    trace = createTraceDecorator({
+      service: 'FooService',
+      tracerConfig: {
+        fullTraceSampleRate: 1,
+        reporter,
+      },
+      contextArgumentPosition: 1,
+    });
+  });
+
+  it(`can wrap a class method`, () => {
+    class Something {
+      @trace()
+      doSomething(_args:any, context?:any) {
+        let x = 1;
+        x++;
+      }
+    }
+    const something = new Something();
+
+    something.doSomething(1);
+    jest.runTimersToTime((reporter as any).config.evaluateFlushIntervalSeconds * 1000);
+
+    expect(mock).toHaveBeenCalledTimes(1);
+    const traces = mock.mock.calls[0][1];
+    expect(traces[0].service).toEqual('FooService');
+    expect(typeof traces[0].traceId).toEqual('number');
+    expect(typeof traces[0].duration).toEqual('number');
+    expect(typeof traces[0].start).toEqual('number');
+    expect(traces[0].error).toEqual(0);
   });
 });

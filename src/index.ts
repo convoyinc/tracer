@@ -1,6 +1,8 @@
+import Reporter from './Reporter';
+import Span from './Span';
 import Tracer from './Tracer';
-import traceFunc from './traceFunc';
 
+export * from './traceFunc';
 export * from './interfaces';
 export * from './traceFunc';
 export * from './Reporter';
@@ -9,4 +11,4 @@ export * from './Tracer';
 
 export default Tracer;
 
-export { Tracer, traceFunc };
+export { Reporter, Span, Tracer };

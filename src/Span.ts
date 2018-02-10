@@ -9,6 +9,7 @@ import { SpanMeta, SpanMetrics } from './interfaces';
  * children as well as siblings.
  */
 export default class Span {
+  public traceId: number;
   public start: number;
   public duration: number;
   public meta: SpanMeta = {};
@@ -71,6 +72,15 @@ export default class Span {
     return this;
   }
 
+  public setTraceId(traceId: number) {
+    this.traceId = traceId;
+    if (!this.children) return this;
+    _.forEach(this.children, child => {
+      child.setTraceId(traceId);
+    });
+    return this;
+  }
+
   get hasEnded() {
     return 'duration' in this;
   }
@@ -79,9 +89,10 @@ export default class Span {
     end: () => Span,
     setMeta: () => Span,
     newChild: () => Span,
-    setError: () => Span,
+    setError: (error?:Error) => Span,
     setMetrics: () => Span,
     removeShortSpans: () => Span,
+    setTraceId: () => Span,
     get hasEnded() {
       return true;
     },

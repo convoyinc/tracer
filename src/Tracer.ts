@@ -3,18 +3,13 @@ import * as autobind from 'protobind';
 
 import Reporter from './Reporter';
 import Span from './Span';
-import { TracerConfiguration, AbstractReporter } from './interfaces';
+import { ReporterConfiguration, TracerConfiguration, AbstractReporter } from './interfaces';
+import { pseudoUuid } from './utils';
 
 export const defaultConfig: TracerConfiguration = {
-  maxTimingsBatchSize: 50,
-  maxTracesBatchSize: 20,
-  evaluateFlushIntervalSeconds: 5,
-  flushIntervalSeconds: 30,
   minimumDurationMs: 10,
   fullTraceSampleRate: 1 / 25,
   globalProperties: {},
-  logger: console,
-  flushHandler: _.noop,
   reporter: null,
 };
 
@@ -24,7 +19,7 @@ export default class Tracer {
 
   constructor(private config: TracerConfiguration) {
     this.config = _.defaults(config, defaultConfig);
-    this.reporter = this.config.reporter || new Reporter(this.config);
+    this.reporter = this.config.reporter || new Reporter(this.config as any);
 
     autobind(this);
   }
@@ -92,9 +87,11 @@ export default class Tracer {
     const currentTrace = this.get();
     if (!currentTrace) return;
 
+    const traceId = this.config.traceId || pseudoUuid();
     this.spanStack = [];
     currentTrace.end();
     currentTrace.removeShortSpans(this.config.minimumDurationMs);
+    currentTrace.setTraceId(traceId);
     this.recordTrace(currentTrace);
 
     return currentTrace;
@@ -146,5 +143,10 @@ export default class Tracer {
     return _.isFunction(this.config.globalProperties)
       ? this.config.globalProperties()
       : this.config.globalProperties;
+  }
+
+  public getTraceId() {
+    const currentTrace = this.get();
+    return _.get(currentTrace, 'traceId');
   }
 }
