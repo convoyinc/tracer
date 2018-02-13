@@ -176,7 +176,6 @@ function traceFunction({
   }
 
   args = context ? args.slice(0, args.length - 1) : args;
-  console.log(name, tracedFunction, tracedFunction.name);
   name = name || tracedFunction.name;
 
   let span:Span|typeof Span.NoOp;
