@@ -4,7 +4,7 @@ import * as uuid from 'uuid';
 import CircularBuffer from 'circularbuffer';
 
 import Span from './Span';
-import { AbstractReporter, ReporterConfiguration, TracerConfiguration, Timing } from './interfaces';
+import { AbstractReporter, Logger, ReporterConfiguration, TracerConfiguration, Timing } from './interfaces';
 
 export const defaultReporterConfig:ReporterConfiguration = {
   maxTimingsBatchSize: 50,
@@ -21,12 +21,12 @@ export default class Reporter implements AbstractReporter {
   private isFlushing = false;
   private lastFlush: Date | null = null;
   private isPending = false;
+  private log:Logger;
 
   constructor(private config: ReporterConfiguration) {
     this.config = _.defaults(config, defaultReporterConfig);
+    this.log = this.config.logger;
   }
-
-  private log = this.config.logger;
 
   public reportTiming(timing: Timing) {
     if (_.isEmpty(timing.id)) {
