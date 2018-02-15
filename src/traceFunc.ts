@@ -52,12 +52,12 @@ export function traceFunc({
 
 export function createTraceDecorator({
   service: defaultService,
-  resource: defaultResource,
+  name: defaultName,
   tracerConfig,
   contextArgumentPosition = 1,
 }:{
   service:string,
-  resource:string,
+  name:string,
   tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
 }) {
@@ -80,11 +80,11 @@ export function createTraceDecorator({
       const tracedFunction = descriptor.value;
       descriptor.value = function traceDecorator(...args:any[]) {
         return traceFunction.call(this, {
-          resource: resource || defaultResource,
+          resource,
           service: service || defaultService,
           tracerConfig,
           contextArgumentPosition,
-          name,
+          name: name || defaultName,
           annotator,
           tags,
           context,
@@ -98,12 +98,12 @@ export function createTraceDecorator({
 
 export function createTraceFunction({
   service: defaultService,
-  resource: defaultResource,
+  name: defaultName,
   tracerConfig,
   contextArgumentPosition = 1,
 }:{
   service:string,
-  resource:string,
+  name:string,
   tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
 }) {
@@ -125,11 +125,11 @@ export function createTraceFunction({
     return (tracedFunction:Function) => {
       return async (...args:any[]) => {
         return traceFunction({
-          resource: resource || defaultResource,
+          resource,
           service: service || defaultService,
           tracerConfig,
           contextArgumentPosition,
-          name,
+          name: name || defaultName,
           annotator,
           tags,
           context,
