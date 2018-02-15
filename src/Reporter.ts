@@ -9,7 +9,6 @@ import { AbstractReporter, Logger, ReporterConfiguration, TracerConfiguration, T
 export const defaultReporterConfig:ReporterConfiguration = {
   maxTimingsBatchSize: 50,
   maxTracesBatchSize: 20,
-  evaluateFlushIntervalSeconds: 5,
   flushIntervalSeconds: 30,
   logger: console,
   flushHandler: _.noop,
@@ -47,7 +46,7 @@ export default class Reporter implements AbstractReporter {
       this.isPending = true;
       idleCallback(
         this.flushIfNeeded.bind(this),
-        +moment.duration(this.config.evaluateFlushIntervalSeconds, 'seconds'),
+        +moment.duration(this.config.flushIntervalSeconds, 'seconds'),
       );
     }
   }

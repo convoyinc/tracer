@@ -97,7 +97,7 @@ describe(`createTraceDecorator`, () => {
     const something = new Something();
 
     something.doSomething(1);
-    jest.runTimersToTime((reporter as any).config.evaluateFlushIntervalSeconds * 1000);
+    jest.runTimersToTime((reporter as any).config.flushIntervalSeconds * 1000);
 
     expect(mock).toHaveBeenCalledTimes(1);
     const traces = mock.mock.calls[0][1];

@@ -39,7 +39,7 @@ const apiReporter = new Reporter({
 });
 ```
 
-The reporter will call `flushHandler` if there are any traces to report on the next [`requestIdleCallback`](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback) (browser) after recording the trace or every `evaluateFlushIntervalSeconds`.
+The reporter will call `flushHandler` if there are any traces to report on the next [`requestIdleCallback`](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback) (browser) after recording the trace or every `flushIntervalSeconds`.
 
 ### Trace Decorator ###
 Decorators are a convenient way to add tracing to an app or service. This library exposes a decorator factory function to generate a decorator that can be reused through your app or service. It establishes a default `service` name to use for all traces, specifies the reporter, the sample rate (recommended for frequently called functions) and the ability to configure which argument in the traced function a context object will be read from or created at (nice when the function you are tracing uses a framework that puts the context object at different positions, such as a GQL resolver or Express middleware).

@@ -42,7 +42,6 @@ export interface ReporterParamsConfiguration {
   maxTimingsBatchSize?: number;
   maxTracesBatchSize?: number;
   flushIntervalSeconds?: number;
-  evaluateFlushIntervalSeconds?: number;
   logger?: Logger;
   flushHandler?: FlushFunction;
 }

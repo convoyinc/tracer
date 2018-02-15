@@ -159,7 +159,7 @@ describe(`Reporter`, () => {
     reporter.reportTiming(timing);
     reporter.reportTrace(trace);
     (reporter as any).lastFlush = null;
-    jest.runTimersToTime((reporter as any).config.evaluateFlushIntervalSeconds * 1000 * 5);
+    jest.runTimersToTime((reporter as any).config.flushIntervalSeconds * 1000 * 5);
 
     expect(reporter.flush).toHaveBeenCalledTimes(1);
   });
