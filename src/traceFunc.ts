@@ -52,10 +52,12 @@ export function traceFunc({
 
 export function createTraceDecorator({
   service: defaultService,
+  resource: defaultResource,
   tracerConfig,
   contextArgumentPosition = 1,
 }:{
   service:string,
+  resource:string,
   tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
 }) {
@@ -78,7 +80,7 @@ export function createTraceDecorator({
       const tracedFunction = descriptor.value;
       descriptor.value = function traceDecorator(...args:any[]) {
         return traceFunction.call(this, {
-          resource,
+          resource: resource || defaultResource,
           service: service || defaultService,
           tracerConfig,
           contextArgumentPosition,
@@ -96,10 +98,12 @@ export function createTraceDecorator({
 
 export function createTraceFunction({
   service: defaultService,
+  resource: defaultResource,
   tracerConfig,
   contextArgumentPosition = 1,
 }:{
   service:string,
+  resource:string,
   tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
 }) {
@@ -121,7 +125,7 @@ export function createTraceFunction({
     return (tracedFunction:Function) => {
       return async (...args:any[]) => {
         return traceFunction({
-          resource,
+          resource: resource || defaultResource,
           service: service || defaultService,
           tracerConfig,
           contextArgumentPosition,
