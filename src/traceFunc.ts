@@ -21,7 +21,7 @@ export interface Context {
   tracer?: Tracer,
 }
 
-export interface Tags {
+export interface Metadata {
   [key:string]:string,
 }
 
@@ -66,14 +66,14 @@ export function createTraceDecorator({
     service,
     name,
     annotator,
-    tags,
+    metadata,
     context,
   }:{
     resource?:string,
     service?:string,
     name?:string,
     annotator?:AnnotatorFunction,
-    tags?:Tags,
+    metadata?:Metadata,
     context?: Context,
   } = {}) {
     return (_target:any, _key?:string, descriptor?:PropertyDescriptor):any => {
@@ -86,7 +86,7 @@ export function createTraceDecorator({
           contextArgumentPosition,
           name: name || defaultName,
           annotator,
-          tags,
+          metadata,
           context,
           args,
           tracedFunction,
@@ -112,14 +112,14 @@ export function createTraceFunction({
     service,
     name,
     annotator,
-    tags,
+    metadata,
     context,
   }:{
     resource?:string,
     service?:string,
     name?:string,
     annotator?:AnnotatorFunction,
-    tags?:Tags,
+    metadata?:Metadata,
     context?: Context,
   } = {}) {
     return (tracedFunction:Function) => {
@@ -131,7 +131,7 @@ export function createTraceFunction({
           contextArgumentPosition,
           name: name || defaultName,
           annotator,
-          tags,
+          metadata,
           context,
           args,
           tracedFunction,
@@ -148,7 +148,7 @@ function traceFunction({
   contextArgumentPosition,
   name,
   annotator,
-  tags,
+  metadata,
   context,
   args,
   tracedFunction,
@@ -161,7 +161,7 @@ function traceFunction({
   tracedFunction:Function,
   name:string,
   annotator:(span:Span, ...args:any[]) => void,
-  tags?:Tags,
+  metadata?:Metadata,
   context?: Context,
 }) {
   if (args.length > contextArgumentPosition + 1 || args.length < contextArgumentPosition) {
@@ -202,21 +202,21 @@ function traceFunction({
     result = tracedFunction.call(this, ...args, context);
   } catch (error) {
     span.setError(error);
-    postFunction({ span, context, annotator, tags, args });
+    postFunction({ span, context, annotator, metadata, args });
     throw error;
   }
   if (isPromiselike(result)) {
     result.then(
       () => {
-        postFunction({ span, context, annotator, tags, args });
+        postFunction({ span, context, annotator, metadata, args });
       },
       (error:Error) => {
         span.setError(error);
-        postFunction({ span, context, annotator, tags, args });
+        postFunction({ span, context, annotator, metadata, args });
       }
     );
   } else {
-    postFunction({ span, context, annotator, tags, args });
+    postFunction({ span, context, annotator, metadata, args });
   }
   return result;
 }
@@ -225,18 +225,18 @@ function postFunction({
   span,
   context,
   annotator,
-  tags,
+  metadata,
   args,
 }:{
   span:any,
   context:Context,
   annotator:AnnotatorFunction,
-  tags?:Tags,
+  metadata?:Metadata,
   args?:any[],
 }) {
   if (span && span !== Span.NoOp) {
-    if (tags) {
-      span.setMeta(tags);
+    if (metadata) {
+      span.setMeta(metadata);
     }
     if (annotator) {
       annotator(span, ...args);
