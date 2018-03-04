@@ -1,6 +1,6 @@
 {
   "name": "@convoy/tracer",
-  "version": "0.0.1",
+  "version": "0.0.103",
   "description": "A tracing library",
   "license": "Apache-2.0",
   "repository": "convoyinc/tracer",
