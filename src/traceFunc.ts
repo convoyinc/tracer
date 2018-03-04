@@ -6,6 +6,7 @@ import { TracerConfiguration } from './interfaces';
 import { ReporterConfiguration } from './index';
 
 export type AnnotatorFunction = (span: Span, ...args: any[]) => void;
+export type ErrorAnnotatorFunction = (span: Span|typeof Span.NoOp, error: Error, ...args: any[]) => void;
 
 export interface TraceFuncArgs {
   tracer: Tracer;
@@ -55,11 +56,13 @@ export function createTraceDecorator({
   name: defaultName,
   tracerConfig,
   contextArgumentPosition = 1,
+  errorAnnotator,
 }:{
   service:string,
   name:string,
   tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
+  errorAnnotator?:ErrorAnnotatorFunction,
 }) {
   return function traceDecorator({
     resource,
@@ -86,6 +89,7 @@ export function createTraceDecorator({
           contextArgumentPosition,
           name: name || defaultName,
           annotator,
+          errorAnnotator,
           metadata,
           context,
           args,
@@ -101,11 +105,13 @@ export function createTraceFunction({
   name: defaultName,
   tracerConfig,
   contextArgumentPosition = 1,
+  errorAnnotator,
 }:{
   service:string,
   name:string,
   tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
+  errorAnnotator?:ErrorAnnotatorFunction,
 }) {
   return function trace({
     resource,
@@ -131,6 +137,7 @@ export function createTraceFunction({
           contextArgumentPosition,
           name: name || defaultName,
           annotator,
+          errorAnnotator,
           metadata,
           context,
           args,
@@ -148,6 +155,7 @@ function traceFunction({
   contextArgumentPosition,
   name,
   annotator,
+  errorAnnotator = baseErrorAnnotator,
   metadata,
   context,
   args,
@@ -161,6 +169,7 @@ function traceFunction({
   tracedFunction:Function,
   name:string,
   annotator:(span:Span, ...args:any[]) => void,
+  errorAnnotator?:ErrorAnnotatorFunction,
   metadata?:Metadata,
   context?: Context,
 }) {
@@ -211,7 +220,7 @@ function traceFunction({
         postFunction({ span, context, annotator, metadata, args });
       },
       (error:Error) => {
-        span.setError(error);
+        errorAnnotator(span, error, ...args);
         postFunction({ span, context, annotator, metadata, args });
       }
     );
@@ -251,4 +260,8 @@ function postFunction({
 
 export function isPromiselike(maybePromise: any): boolean {
   return maybePromise && _.isFunction(maybePromise.then) && _.isFunction(maybePromise.catch);
+}
+
+function baseErrorAnnotator(span:Span|typeof Span.NoOp, error:Error) {
+  span.setError(error);
 }
