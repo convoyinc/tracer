@@ -102,15 +102,15 @@ export function createTraceDecorator({
 
 export function createTraceFunction({
   service: defaultService,
-  name: defaultName,
+  name: defaultName = 'unknownTracedFunction',
   tracerConfig,
   contextArgumentPosition = 1,
   errorAnnotator,
 }:{
   service:string,
-  name:string,
+  name?:string,
   tracerConfig:TracerConfiguration,
-  contextArgumentPosition:number,
+  contextArgumentPosition?:number,
   errorAnnotator?:ErrorAnnotatorFunction,
 }) {
   return function trace({
