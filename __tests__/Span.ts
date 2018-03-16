@@ -92,7 +92,7 @@ describe(`Span`, () => {
       const emptyTags = {};
       span.tags = {};
       span.setTags(emptyTags);
-      expect(span.tags).toMatchObject(emptyTags);
+      expect(_.keys(span.tags)).toEqual([]);
     });
   });
 

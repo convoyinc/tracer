@@ -35,14 +35,10 @@ export default class Tracer {
 
     const span = new Span(resource, name, service);
 
-    const globalProperties = _.isFunction(this.config.globalProperties)
-      ? this.config.globalProperties()
-      : this.config.globalProperties;
+    const globalProperties = this.getGlobalProperties();
     span.setMeta(globalProperties);
 
-    const globalTags = _.isFunction(this.config.globalTags)
-      ? this.config.globalTags()
-      : this.config.globalTags;
+    const globalTags = this.getGlobalTags();
     span.setTags(globalTags);
 
     this.spanStack = [span];
