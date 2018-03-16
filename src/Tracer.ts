@@ -10,6 +10,7 @@ export const defaultConfig: TracerConfiguration = {
   minimumDurationMs: 10,
   fullTraceSampleRate: 1 / 25,
   globalProperties: {},
+  globalTags: {},
   reporter: null,
 };
 
@@ -38,6 +39,11 @@ export default class Tracer {
       ? this.config.globalProperties()
       : this.config.globalProperties;
     span.setMeta(globalProperties);
+
+    const globalTags = _.isFunction(this.config.globalTags)
+      ? this.config.globalTags()
+      : this.config.globalTags;
+    span.setTags(globalTags);
 
     this.spanStack = [span];
     return _.head(this.spanStack);
@@ -119,18 +125,18 @@ export default class Tracer {
   }
 
   private recordSpanTiming(
-    { name, service, resource, duration, meta }: Span,
-    extraMeta = {},
+    { name, service, resource, duration, meta, tags }: Span,
+    extraTags = {},
     prefix = '',
   ) {
     this.reporter.reportTiming({
       name: `${prefix}${service}.${name}`,
       duration,
       tags: this.sanitizeTags({
+        ...this.getGlobalTags(),
+        ...extraTags,
+        ...tags,
         resource,
-        ...meta,
-        ...extraMeta,
-        ...this.getGlobalProperties(),
       }),
     });
   }
@@ -143,6 +149,12 @@ export default class Tracer {
     return _.isFunction(this.config.globalProperties)
       ? this.config.globalProperties()
       : this.config.globalProperties;
+  }
+
+  public getGlobalTags() {
+    return _.isFunction(this.config.globalTags)
+      ? this.config.globalTags()
+      : this.config.globalTags;
   }
 
   public getTraceId() {
