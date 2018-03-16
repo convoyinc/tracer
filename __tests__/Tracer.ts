@@ -164,10 +164,10 @@ describe(`Trace`, () => {
   describe(`recordSpanTiming`, () => {
     it(`allows you to pass it extra metadata`, () => {
       (tracer as any).reporter.reportTiming = jest.fn();
-      const extraMetadata = { baz: 'qux' };
-      (tracer as any).recordSpanTiming(span, extraMetadata);
+      const extraTags = { baz: 'qux' };
+      (tracer as any).recordSpanTiming(span, extraTags);
       expect((tracer as any).reporter.reportTiming.mock.calls[0][0].tags).toMatchObject(
-        extraMetadata,
+        extraTags,
       );
     });
 
@@ -181,19 +181,19 @@ describe(`Trace`, () => {
     });
   });
 
-  describe(`globalProperties`, () => {
+  describe(`globalTags`, () => {
     it(`works if you provide it with a function`, () => {
-      const globalProperties = { baz: 'quux' };
-      (tracer as any).config.globalProperties = () => globalProperties;
+      const globalTags = { baz: 'quux' };
+      (tracer as any).config.globalTags = () => globalTags;
       (tracer as any).recordSpanTiming(span);
-      expect((tracer as any).reporter.timings.buffer[0].tags).toMatchObject(globalProperties);
+      expect((tracer as any).reporter.timings.buffer[0].tags).toMatchObject(globalTags);
     });
 
     it(`works if you provide it with an object`, () => {
-      const globalProperties = { baz: 'quux' };
-      (tracer as any).config.globalProperties = globalProperties;
+      const globalTags = { baz: 'quux' };
+      (tracer as any).config.globalTags = globalTags;
       (tracer as any).recordSpanTiming(span);
-      expect((tracer as any).reporter.timings.buffer[0].tags).toMatchObject(globalProperties);
+      expect((tracer as any).reporter.timings.buffer[0].tags).toMatchObject(globalTags);
     });
   });
 });

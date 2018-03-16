@@ -64,6 +64,38 @@ describe(`Span`, () => {
     });
   });
 
+  describe(`setTags`, () => {
+    let tags;
+    beforeEach(() => {
+      tags = { foo: 'bar' };
+      span.setTags(tags);
+    });
+
+    it(`adds the tags to the 'tags' property`, () => {
+      expect(span.tags).toMatchObject(tags);
+    });
+
+    it(`adds the tags to any existing tags`, () => {
+      const newTags = { bar: 'foo' };
+      span.setTags(newTags);
+      expect(span.tags).toMatchObject({ ...tags, ...newTags });
+    });
+
+    it(`removes tags with non-primitive values`, () => {
+      const nonPrimitive = { bar: { baz: 'qux' } };
+      span.setTags(nonPrimitive as any);
+      expect(span.tags).toMatchObject(tags);
+      expect(span.tags).not.toMatchObject(nonPrimitive);
+    });
+
+    it(`doesn't add anything if you pass it an empty object`, () => {
+      const emptyTags = {};
+      span.tags = {};
+      span.setTags(emptyTags);
+      expect(_.keys(span.tags)).toEqual([]);
+    });
+  });
+
   describe(`setMetrics`, () => {
     let metrics;
     beforeEach(() => {
@@ -98,6 +130,13 @@ describe(`Span`, () => {
       expect(span.meta).toMatchObject({
         'error.name': 'Error',
         'error.message': errorMessage,
+      });
+    });
+
+    it(`adds the error tags to the 'tags' property`, () => {
+      expect(span.tags).toMatchObject({
+        'error.name': 'Error',
+        error: '1',
       });
     });
   });

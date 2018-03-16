@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 
 import Span from './Span';
 import Tracer from './Tracer';
-import { TracerConfiguration } from './interfaces';
+import { SpanMeta, SpanTags, TracerConfiguration } from './interfaces';
 import { ReporterConfiguration } from './index';
 
 export type AnnotatorFunction = (span: Span, ...args: any[]) => void;
@@ -22,9 +22,7 @@ export interface Context {
   tracer?: Tracer,
 }
 
-export interface Metadata {
-  [key:string]:string,
-}
+export type Metadata = SpanMeta;
 
 export function traceFunc({
   tracer,
@@ -70,13 +68,15 @@ export function createTraceDecorator({
     name,
     annotator,
     metadata,
+    tags,
     context,
   }:{
     resource?:string,
     service?:string,
     name?:string,
     annotator?:AnnotatorFunction,
-    metadata?:Metadata,
+    metadata?:SpanMeta,
+    tags?:SpanTags,
     context?: Context,
   } = {}) {
     return (_target:any, _key?:string, descriptor?:PropertyDescriptor):any => {
@@ -91,6 +91,7 @@ export function createTraceDecorator({
           annotator,
           errorAnnotator,
           metadata,
+          tags,
           context,
           args,
           tracedFunction,
@@ -119,13 +120,15 @@ export function createTraceFunction({
     name,
     annotator,
     metadata,
+    tags,
     context,
   }:{
     resource?:string,
     service?:string,
     name?:string,
     annotator?:AnnotatorFunction,
-    metadata?:Metadata,
+    metadata?:SpanMeta,
+    tags?:SpanTags,
     context?: Context,
   } = {}) {
     return (tracedFunction:Function) => {
@@ -139,6 +142,7 @@ export function createTraceFunction({
           annotator,
           errorAnnotator,
           metadata,
+          tags,
           context,
           args,
           tracedFunction,
@@ -157,6 +161,7 @@ function traceFunction({
   annotator,
   errorAnnotator = baseErrorAnnotator,
   metadata,
+  tags,
   context,
   args,
   tracedFunction,
@@ -170,7 +175,8 @@ function traceFunction({
   name:string,
   annotator:(span:Span, ...args:any[]) => void,
   errorAnnotator?:ErrorAnnotatorFunction,
-  metadata?:Metadata,
+  metadata?:SpanMeta,
+  tags?:SpanTags,
   context?: Context,
 }) {
   if (args.length > contextArgumentPosition + 1 || args.length < contextArgumentPosition) {
@@ -211,17 +217,17 @@ function traceFunction({
     result = tracedFunction.call(this, ...args, context);
   } catch (error) {
     span.setError(error);
-    postFunction({ span, context, annotator, metadata, args });
+    postFunction({ span, context, annotator, metadata, tags, args });
     throw error;
   }
   if (isPromiselike(result)) {
     result.then(
       () => {
-        postFunction({ span, context, annotator, metadata, args });
+        postFunction({ span, context, annotator, metadata, tags, args });
       },
       (error:Error) => {
         errorAnnotator(span, error, ...args);
-        postFunction({ span, context, annotator, metadata, args });
+        postFunction({ span, context, annotator, metadata, tags, args });
       }
     );
   } else {
@@ -235,17 +241,22 @@ function postFunction({
   context,
   annotator,
   metadata,
+  tags,
   args,
 }:{
   span:any,
   context:Context,
   annotator:AnnotatorFunction,
-  metadata?:Metadata,
+  metadata?:SpanMeta,
+  tags?:SpanTags,
   args?:any[],
 }) {
   if (span && span !== Span.NoOp) {
     if (metadata) {
       span.setMeta(metadata);
+    }
+    if (tags) {
+      span.setTags(tags);
     }
     if (annotator) {
       annotator(span, ...args);

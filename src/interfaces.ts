@@ -21,6 +21,10 @@ export interface SpanMeta {
   [key: string]: string;
 }
 
+export interface SpanTags {
+  [key: string]: string;
+}
+
 export interface SpanMetrics {
   [key: string]: number;
 }
@@ -50,6 +54,7 @@ export interface TracerConfiguration extends ReporterParamsConfiguration {
   minimumDurationMs?: number;
   fullTraceSampleRate?: number;
   globalProperties?: { [key: string]: string } | Function;
+  globalTags?: { [key: string]: string } | Function;
   reporter?: null | AbstractReporter;
   traceId?: number;
 }
