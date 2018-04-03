@@ -79,7 +79,7 @@ describe(`createTraceDecorator`, () => {
     trace = createTraceDecorator({
       service: 'FooService',
       tracerConfig: {
-        fullTraceSampleRate: 1,
+        sampleRate: 1,
         reporter,
       },
       contextArgumentPosition: 1,
@@ -100,7 +100,7 @@ describe(`createTraceDecorator`, () => {
     jest.runTimersToTime((reporter as any).config.flushIntervalSeconds * 1000);
 
     expect(mock).toHaveBeenCalledTimes(1);
-    const traces = mock.mock.calls[0][1];
+    const traces = mock.mock.calls[0][0];
     expect(traces[0].service).toEqual('FooService');
     expect(typeof traces[0].traceId).toEqual('number');
     expect(typeof traces[0].duration).toEqual('number');

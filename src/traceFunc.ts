@@ -57,7 +57,7 @@ export function createTraceDecorator({
   errorAnnotator,
 }:{
   service:string,
-  name:string,
+  name?:string,
   tracerConfig:TracerConfiguration,
   contextArgumentPosition:number,
   errorAnnotator?:ErrorAnnotatorFunction,
