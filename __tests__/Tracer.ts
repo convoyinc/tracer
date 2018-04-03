@@ -7,15 +7,18 @@ import { defaultConfig } from '../src/Tracer';
 import { TracerConfiguration } from '../src/interfaces';
 
 describe(`Trace`, () => {
-  let tracer: Tracer, config: TracerConfiguration, span: Span, resource, name, service;
+  let tracer: Tracer, config: TracerConfiguration, span: Span, resource, name, service, reporter: Reporter;
 
   beforeEach(() => {
+    reporter = new Reporter({
+      flushHandler: async (...args: any[]) => args,
+    });
     config = {
       minimumDurationMs: 0,
       globalMetadata: () => ({
         foo: 'bar',
       }),
-      flushHandler: async (...args: any[]) => args,
+      reporter,
     };
     resource = 'FooResource';
     name = 'FooName';
@@ -31,7 +34,7 @@ describe(`Trace`, () => {
     });
 
     it(`initializes a queue`, () => {
-      expect((tracer as any).reporter).toBeInstanceOf(Reporter);
+      expect((tracer as any).reporter).toEqual(reporter);
     });
   });
 

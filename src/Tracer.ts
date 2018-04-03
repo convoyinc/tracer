@@ -19,6 +19,7 @@ export default class Tracer {
 
   constructor(private config: TracerConfiguration) {
     this.config = _.defaults(config, defaultConfig);
+    this.reporter = this.config.reporter;
 
     autobind(this);
   }
