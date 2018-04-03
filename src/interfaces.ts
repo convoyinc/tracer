@@ -29,22 +29,18 @@ export interface AbstractReporter {
   reportTrace(trace: Span): any;
 }
 
-export interface ReporterParamsConfiguration {
-  maxTracesBatchSize?: number;
-  flushIntervalSeconds?: number;
-  logger?: Logger;
-  flushHandler?: FlushFunction;
-}
-
-export interface TracerConfiguration extends ReporterParamsConfiguration {
+export interface TracerConfiguration  {
   minimumDurationMs?: number;
   sampleRate?: number;
   globalMetadata?: { [key: string]: string } | Function;
   globalTags?: { [key: string]: string } | Function;
-  reporter?: null | AbstractReporter;
+  reporter: AbstractReporter;
   traceId?: number;
 }
 
-export interface ReporterConfiguration extends ReporterParamsConfiguration {
-  flushHandler: FlushFunction;
+export interface ReporterConfiguration {
+  maxTracesBatchSize?: number;
+  flushIntervalSeconds?: number;
+  logger?: Logger;
+  flushHandler?: FlushFunction;
 }

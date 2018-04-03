@@ -6,12 +6,11 @@ import Span from './Span';
 import { ReporterConfiguration, TracerConfiguration, AbstractReporter } from './interfaces';
 import { pseudoUuid } from './utils';
 
-export const defaultConfig: TracerConfiguration = {
+export const defaultConfig = {
   minimumDurationMs: 10,
   sampleRate: 1,
   globalMetadata: {},
   globalTags: {},
-  reporter: null,
 };
 
 export default class Tracer {
@@ -20,7 +19,6 @@ export default class Tracer {
 
   constructor(private config: TracerConfiguration) {
     this.config = _.defaults(config, defaultConfig);
-    this.reporter = this.config.reporter || new Reporter(this.config as any);
 
     autobind(this);
   }
