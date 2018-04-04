@@ -59,7 +59,7 @@ export function createTraceDecorator({
   service:string,
   name:string,
   tracerConfig:TracerConfiguration,
-  contextArgumentPosition:number,
+  contextArgumentPosition?:number,
   errorAnnotator?:ErrorAnnotatorFunction,
 }) {
   return function traceDecorator({
@@ -169,7 +169,7 @@ function traceFunction({
   resource:string,
   service:string,
   tracerConfig:TracerConfiguration,
-  contextArgumentPosition:number,
+  contextArgumentPosition?:number,
   args:any[],
   tracedFunction:Function,
   name:string,
@@ -179,10 +179,6 @@ function traceFunction({
   tags?:SpanTags,
   context?: Context,
 }) {
-  if (args.length > contextArgumentPosition + 1 || args.length < contextArgumentPosition) {
-    throw new Error(`tracing can only be applied to function with ${contextArgumentPosition} arguments ` +
-      `and an optional context argument`);
-  }
 
   context = context || args[contextArgumentPosition];
 
