@@ -53,7 +53,7 @@ export function createTraceDecorator({
   service: defaultService,
   name: defaultName,
   tracerConfig,
-  contextArgumentPosition = 1,
+  contextArgumentPosition,
   errorAnnotator,
 }:{
   service:string,
@@ -105,7 +105,7 @@ export function createTraceFunction({
   service: defaultService,
   name: defaultName = 'unknownTracedFunction',
   tracerConfig,
-  contextArgumentPosition = 1,
+  contextArgumentPosition,
   errorAnnotator,
 }:{
   service:string,
@@ -180,17 +180,16 @@ function traceFunction({
   context?: Context,
 }) {
 
-  context = context || args[contextArgumentPosition];
+  context = args[contextArgumentPosition] || context || { _contextObject: true };
 
-  if (context === undefined) {
-    context = { _contextObject: true };
+  if(_.isNumber(contextArgumentPosition)) {
+    args[contextArgumentPosition] = context;
   }
 
   if (!context || !context._contextObject) {
     throw new Error(`tracing requires the argument at position ${contextArgumentPosition} to be a context object`);
   }
 
-  args = context ? args.slice(0, args.length - 1) : args;
   name = name || tracedFunction.name;
 
   let span:Span|typeof Span.NoOp;
@@ -210,7 +209,7 @@ function traceFunction({
   // show up as coming from the instrumented call).
   let result;
   try {
-    result = tracedFunction.call(this, ...args, context);
+    result = tracedFunction.call(this, ...args);
   } catch (error) {
     span.setError(error);
     postFunction({ span, context, annotator, metadata, tags, args });
