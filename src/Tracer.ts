@@ -40,6 +40,9 @@ export default class Tracer {
     const globalTags = this.getGlobalTags();
     span.setTags(globalTags);
 
+    const traceId = this.config.traceId || pseudoUuid();
+    span.setTraceId(traceId);
+
     this.spanStack = [span];
     return _.head(this.spanStack);
   }
@@ -88,11 +91,10 @@ export default class Tracer {
     const currentTrace = this.get();
     if (!currentTrace) return;
 
-    const traceId = this.config.traceId || pseudoUuid();
     this.spanStack = [];
     currentTrace.end();
     currentTrace.removeShortSpans(this.config.minimumDurationMs);
-    currentTrace.setTraceId(traceId);
+    currentTrace.setTraceId(currentTrace.traceId);
     this.recordTrace(currentTrace);
 
     return currentTrace;

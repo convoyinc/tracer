@@ -55,7 +55,7 @@ export const trace = createTraceDecorator({
     fullTraceSampleRate: 1 / 20,
     reporter: apiReporter,
   },
-  contextArgumentPosition: 1,
+  contextArgumentPosition: 1, // if not specified, a new context will be created
 });
 
 class Something {
