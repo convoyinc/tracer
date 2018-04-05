@@ -6,12 +6,11 @@ import Span from './Span';
 import { ReporterConfiguration, TracerConfiguration, AbstractReporter } from './interfaces';
 import { pseudoUuid } from './utils';
 
-export const defaultConfig: TracerConfiguration = {
+export const defaultConfig = {
   minimumDurationMs: 10,
-  fullTraceSampleRate: 1 / 25,
-  globalProperties: {},
+  sampleRate: 1,
+  globalMetadata: {},
   globalTags: {},
-  reporter: null,
 };
 
 export default class Tracer {
@@ -20,7 +19,7 @@ export default class Tracer {
 
   constructor(private config: TracerConfiguration) {
     this.config = _.defaults(config, defaultConfig);
-    this.reporter = this.config.reporter || new Reporter(this.config as any);
+    this.reporter = this.config.reporter;
 
     autobind(this);
   }
@@ -35,11 +34,14 @@ export default class Tracer {
 
     const span = new Span(resource, name, service);
 
-    const globalProperties = this.getGlobalProperties();
-    span.setMeta(globalProperties);
+    const globalMetadata = this.getGlobalMetadata();
+    span.setMeta(globalMetadata);
 
     const globalTags = this.getGlobalTags();
     span.setTags(globalTags);
+
+    const traceId = this.config.traceId || pseudoUuid();
+    span.setTraceId(traceId);
 
     this.spanStack = [span];
     return _.head(this.spanStack);
@@ -89,11 +91,10 @@ export default class Tracer {
     const currentTrace = this.get();
     if (!currentTrace) return;
 
-    const traceId = this.config.traceId || pseudoUuid();
     this.spanStack = [];
     currentTrace.end();
     currentTrace.removeShortSpans(this.config.minimumDurationMs);
-    currentTrace.setTraceId(traceId);
+    currentTrace.setTraceId(currentTrace.traceId);
     this.recordTrace(currentTrace);
 
     return currentTrace;
@@ -105,46 +106,19 @@ export default class Tracer {
   }
 
   public recordTrace(trace: Span) {
-    if (Math.random() <= this.config.fullTraceSampleRate) {
+    if (Math.random() <= this.config.sampleRate) {
       this.reporter.reportTrace(trace);
     }
-
-    /**
-     * We always record two levels of the trace as metrics. So far, this maps
-     * well to the traces we have (and are thinking about). It may need to be
-     * more configurable in the future.
-     */
-    this.recordSpanTiming(trace);
-    for (const child of trace.children) {
-      this.recordSpanTiming(child, { resource: trace.resource }, `${trace.service}.${trace.name}.`);
-    }
-  }
-
-  private recordSpanTiming(
-    { name, service, resource, duration, meta, tags }: Span,
-    extraTags = {},
-    prefix = '',
-  ) {
-    this.reporter.reportTiming({
-      name: `${prefix}${service}.${name}`,
-      duration,
-      tags: this.sanitizeTags({
-        ...this.getGlobalTags(),
-        ...extraTags,
-        ...tags,
-        resource,
-      }),
-    });
   }
 
   public sanitizeTags(tags: any) {
     return _(tags).omitBy(_.isObject).mapValues(_.toString).value();
   }
 
-  public getGlobalProperties() {
-    return _.isFunction(this.config.globalProperties)
-      ? this.config.globalProperties()
-      : this.config.globalProperties;
+  public getGlobalMetadata() {
+    return _.isFunction(this.config.globalMetadata)
+      ? this.config.globalMetadata()
+      : this.config.globalMetadata;
   }
 
   public getGlobalTags() {

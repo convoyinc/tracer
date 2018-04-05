@@ -96,24 +96,6 @@ describe(`Span`, () => {
     });
   });
 
-  describe(`setMetrics`, () => {
-    let metrics;
-    beforeEach(() => {
-      metrics = { foo: 1 };
-      span.setMetrics(metrics);
-    });
-
-    it(`adds the metrics to the 'metrics' property`, () => {
-      expect(span.metrics).toMatchObject(metrics);
-    });
-
-    it(`adds the metrics to any existing metrics`, () => {
-      const newMetrics = { bar: 2 };
-      span.setMetrics(newMetrics);
-      expect(span.metrics).toMatchObject({ ...metrics, ...newMetrics });
-    });
-  });
-
   describe(`setError`, () => {
     let error, errorMessage;
     beforeEach(() => {

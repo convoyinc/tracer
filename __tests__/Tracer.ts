@@ -7,14 +7,18 @@ import { defaultConfig } from '../src/Tracer';
 import { TracerConfiguration } from '../src/interfaces';
 
 describe(`Trace`, () => {
-  let tracer: Tracer, config: TracerConfiguration, span: Span, resource, name, service;
+  let tracer: Tracer, config: TracerConfiguration, span: Span, resource, name, service, reporter: Reporter;
 
   beforeEach(() => {
+    reporter = new Reporter({
+      flushHandler: async (...args: any[]) => args,
+    });
     config = {
-      globalProperties: () => ({
+      minimumDurationMs: 0,
+      globalMetadata: () => ({
         foo: 'bar',
       }),
-      flushHandler: async (...args: any[]) => args,
+      reporter,
     };
     resource = 'FooResource';
     name = 'FooName';
@@ -30,7 +34,7 @@ describe(`Trace`, () => {
     });
 
     it(`initializes a queue`, () => {
-      expect((tracer as any).reporter).toBeInstanceOf(Reporter);
+      expect((tracer as any).reporter).toEqual(reporter);
     });
   });
 
@@ -149,51 +153,29 @@ describe(`Trace`, () => {
       tracer.recordTrace(tracer.get());
       expect((tracer as any).reporter.reportTrace).toHaveBeenCalled;
     });
-
-    it(`calls 'recordSpanTiming' for the trace and each of its children`, () => {
-      (tracer as any).recordSpanTiming = jest.fn();
-      tracer.start(resource, name);
-      const trace = tracer.get();
-      trace.children = [span];
-      tracer.recordTrace(trace);
-      expect((tracer as any).recordSpanTiming.mock.calls[0][0]).toBe(trace);
-      expect((tracer as any).recordSpanTiming.mock.calls[1][0]).toBe(span);
-    });
-  });
-
-  describe(`recordSpanTiming`, () => {
-    it(`allows you to pass it extra metadata`, () => {
-      (tracer as any).reporter.reportTiming = jest.fn();
-      const extraTags = { baz: 'qux' };
-      (tracer as any).recordSpanTiming(span, extraTags);
-      expect((tracer as any).reporter.reportTiming.mock.calls[0][0].tags).toMatchObject(
-        extraTags,
-      );
-    });
-
-    it(`allows you to pass it a custom prefix`, () => {
-      (tracer as any).reporter.reportTiming = jest.fn();
-      const prefix = 'fooBarPrefix';
-      (tracer as any).recordSpanTiming(span, {}, prefix);
-      expect((tracer as any).reporter.reportTiming.mock.calls[0][0].name).toMatch(
-        new RegExp(prefix),
-      );
-    });
   });
 
   describe(`globalTags`, () => {
     it(`works if you provide it with a function`, () => {
       const globalTags = { baz: 'quux' };
-      (tracer as any).config.globalTags = () => globalTags;
-      (tracer as any).recordSpanTiming(span);
-      expect((tracer as any).reporter.timings.buffer[0].tags).toMatchObject(globalTags);
+      const taggedTracer = new Tracer({
+        ...config,
+        globalTags: () => globalTags,
+      });
+      taggedTracer.start('resource', 'name', 'service');
+      taggedTracer.end();
+      expect((taggedTracer as any).reporter.traces.buffer[0].tags).toMatchObject(globalTags);
     });
 
     it(`works if you provide it with an object`, () => {
       const globalTags = { baz: 'quux' };
-      (tracer as any).config.globalTags = globalTags;
-      (tracer as any).recordSpanTiming(span);
-      expect((tracer as any).reporter.timings.buffer[0].tags).toMatchObject(globalTags);
+      const taggedTracer = new Tracer({
+        ...config,
+        globalTags,
+      });
+      taggedTracer.start('resource', 'name', 'service');
+      taggedTracer.end();
+      expect((taggedTracer as any).reporter.traces.buffer[0].tags).toMatchObject(globalTags);
     });
   });
 });

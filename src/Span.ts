@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as now from '@streammedev/perfnow';
 
-import { SpanMeta, SpanMetrics, SpanTags } from './interfaces';
+import { SpanMeta, SpanTags } from './interfaces';
 
 /**
  * Spans represent the amount of time spent during a single operation. Traces
@@ -13,7 +13,6 @@ export default class Span {
   public start: number;
   public duration: number;
   public meta: SpanMeta = {};
-  public metrics?: SpanMetrics;
   public children: Span[] = [];
   public tags: SpanTags = {};
   public error: number = 0;
@@ -39,11 +38,6 @@ export default class Span {
     if (_.isEmpty(tags)) return this;
     const cleanTags = _(tags).omitBy(_.isObject).mapValues(_.toString).value();
     this.tags = { ...this.tags, ...cleanTags };
-    return this;
-  }
-
-  public setMetrics(metrics: SpanMetrics) {
-    this.metrics = { ...this.metrics, ...metrics };
     return this;
   }
 
@@ -106,7 +100,6 @@ export default class Span {
     setTags: () => Span,
     newChild: () => Span,
     setError: (error?:Error) => Span,
-    setMetrics: () => Span,
     removeShortSpans: () => Span,
     setTraceId: () => Span,
     get hasEnded() {
