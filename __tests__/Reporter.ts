@@ -5,28 +5,20 @@ import * as uuid from 'uuid';
 import Reporter, { defaultReporterConfig } from '../src/Reporter';
 import Span from '../src/Span';
 import { defaultConfig } from '../src/Tracer';
-import { Timing, TracerConfiguration, ReporterConfiguration } from '../src/interfaces';
+import { TracerConfiguration, ReporterConfiguration } from '../src/interfaces';
 
 describe(`Reporter`, () => {
-  let reporter: Reporter, config: TracerConfiguration, timing: Timing, trace: Span;
+  let reporter: Reporter, config: TracerConfiguration, trace: Span;
   beforeEach(() => {
     jest.useFakeTimers();
     config = {
       ...defaultConfig,
       ...defaultReporterConfig,
-      globalProperties: { foo: 'bar' },
+      globalMetadata: { foo: 'bar' },
       flushHandler: jest.fn(),
     };
 
     trace = new Span('FooResource', 'FooName', 'FooService');
-    timing = {
-      id: uuid.v4(),
-      name: 'Foo',
-      duration: 500,
-      tags: {
-        foo: 'bar',
-      },
-    };
 
     reporter = new Reporter(config);
   });
@@ -41,19 +33,6 @@ describe(`Reporter`, () => {
     });
   });
 
-  describe(`reportTiming`, () => {
-    it(`adds the timing to the timings queue`, async () => {
-      await reporter.reportTiming(timing);
-      expect((reporter as any).timings).toHaveLength(1);
-    });
-
-    it(`adds an id to the timing if it doesn't already have one`, async () => {
-      delete timing.id;
-      await reporter.reportTiming(timing);
-      expect((reporter as any).timings.buffer[0].id).toBeDefined;
-    });
-  });
-
   describe(`reporterTrace`, () => {
     it(`adds the trace to the array of traces`, async () => {
       await reporter.reportTrace(trace);
@@ -63,14 +42,12 @@ describe(`Reporter`, () => {
 
   describe(`flushIfNeeded`, () => {
     it(`it calls flush if it's not already flushing and it has items to flush`, async () => {
-      (reporter as any).timings.buffer = [timing];
       reporter.flush = jest.fn();
       await reporter.flushIfNeeded();
       expect(reporter.flush).toHaveBeenCalled;
     });
 
     it(`it doesn't call flush if it's already flushing`, async () => {
-      (reporter as any).timings.buffer = [timing];
       reporter.flush = jest.fn();
       (reporter as any).isFlushing = true;
       await reporter.flushIfNeeded();
@@ -78,7 +55,6 @@ describe(`Reporter`, () => {
     });
 
     it(`it doesn't call flush if the last flush time was too recent`, async () => {
-      (reporter as any).timings.buffer = [timing];
       reporter.flush = jest.fn();
       (reporter as any).lastFlush = moment().subtract(2, 'seconds').toISOString();
       await reporter.flushIfNeeded();
@@ -103,15 +79,10 @@ describe(`Reporter`, () => {
   });
 
   describe(`removeFromQueue`, () => {
-    it(`removes the specified timings from the queue`, () => {
-      (reporter as any).timings.buffer = [timing];
-      reporter.removeFromQueue([timing], []);
-      expect((reporter as any).timings).toHaveLength(0);
-    });
 
     it(`removes the specified traces from the queue`, () => {
       (reporter as any).traces.buffer = [trace];
-      reporter.removeFromQueue([], [trace]);
+      reporter.removeFromQueue([trace]);
       expect((reporter as any).traces).toHaveLength(0);
     });
   });
@@ -139,7 +110,6 @@ describe(`Reporter`, () => {
 
     it(`does call our flushHandler if there are items to be flushed`, async () => {
       (reporter as any).config.flushHandler = jest.fn();
-      (reporter as any).timings.buffer = [timing];
       await reporter.flush();
       expect((reporter as any).config.flushHandler).toHaveBeenCalled;
     });
@@ -147,16 +117,14 @@ describe(`Reporter`, () => {
 
   describe(`queueSizes`, () => {
     it(`returns the correct size for each queue`, () => {
-      (reporter as any).timings.buffer = [timing];
       (reporter as any).traces.buffer = [trace];
-      expect(reporter.queueSizes).toMatchObject({ traces: 1, timings: 1 });
+      expect(reporter.queueSizes).toMatchObject({ traces: 1 });
     });
   });
 
   it(`flushes at the correct frequency`, () => {
     reporter.flush = jest.fn();
 
-    reporter.reportTiming(timing);
     reporter.reportTrace(trace);
     (reporter as any).lastFlush = null;
     jest.runTimersToTime((reporter as any).config.flushIntervalSeconds * 1000 * 5);
@@ -166,7 +134,6 @@ describe(`Reporter`, () => {
 
   it(`logs any errors encountered while flushing`, async () => {
     console.error = jest.fn();
-    (reporter as any).timings.buffer = [timing];
     (reporter as any).traces.buffer = [trace];
     const error = new Error('Foo Bar');
     reporter.removeFromQueue = () => {
