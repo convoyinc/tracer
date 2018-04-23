@@ -27,6 +27,18 @@ export default class Span {
     return child;
   }
 
+  public addChild(childSpan: Span) {
+    this.children.push(childSpan);
+    return this;
+  }
+
+  public removeChild(childSpan: Span) {
+    _.remove(this.children, (child) => {
+      return child === childSpan;
+    });
+    return this;
+  }
+
   public setMeta(meta: SpanMeta) {
     if (_.isEmpty(meta)) return this;
     const cleanMeta = _(meta).omitBy(_.isObject).mapValues(_.toString).value();
