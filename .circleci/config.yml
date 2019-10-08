@@ -1,66 +1,61 @@
 version: 2
-
-base_image: &base_image
-  image: convoyinc/circleci-node:10.13.0
-
-job_common: &job_common
-  docker:
-    - <<: *base_image
+base_image:
+  image: 'convoyinc/circleci-node:10.13.0'
+job_common:
+  docker: &ref_0
+    - image: 'convoyinc/circleci-node:10.13.0'
   working_directory: ~/sandbox/code
-
-attach: &attach
-  attach_workspace:
+attach:
+  attach_workspace: &ref_1
     at: ~/sandbox
-
-store_artifacts: &store_artifacts
-  store_artifacts:
+store_artifacts:
+  store_artifacts: &ref_2
     path: ~/sandbox/code/coverage
     destination: /
-
-store_test_results: &store_test_results
-  store_test_results:
+store_test_results:
+  store_test_results: &ref_3
     path: ~/sandbox/code/coverage
-
 jobs:
   build:
-    <<: *job_common
+    docker: *ref_0
+    working_directory: ~/sandbox/code
     steps:
       - checkout:
           path: ~/sandbox/code
       - restore_cache:
-          key: dependencies-{{ checksum "yarn.lock" }}
+          key: 'dependencies-{{ checksum "yarn.lock" }}'
       - run: yarn
       - save_cache:
-          key: dependencies-{{ checksum "yarn.lock" }}
+          key: 'dependencies-{{ checksum "yarn.lock" }}'
           paths:
             - ~/sandbox/code/node_modules
       - run: yarn run build
       - persist_to_workspace:
           root: ~/sandbox
           paths: code
-
   test:
-    <<: *job_common
+    docker: *ref_0
+    working_directory: ~/sandbox/code
     steps:
       - checkout
-      - <<: *attach
-      - run: yarn run test:coverage
-      - <<: *store_artifacts
-      - <<: *store_test_results
-      - run: bash <(curl -s https://codecov.io/bash)
-
+      - attach_workspace: *ref_1
+      - run: 'yarn run test:coverage'
+      - run: 'yarn test:audit'
+      - store_artifacts: *ref_2
+      - store_test_results: *ref_3
+      - run: 'bash <(curl -s https://codecov.io/bash)'
   release:
-    <<: *job_common
+    docker: *ref_0
+    working_directory: ~/sandbox/code
     steps:
       - checkout
-      - <<: *attach
-      - run: yarn config set registry https://registry.npmjs.org/
-      - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+      - attach_workspace: *ref_1
+      - run: 'yarn config set registry https://registry.npmjs.org/'
+      - run: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
       - run: git config --global user.email "donvoy@convoy.com"
       - run: git config --global user.name "Don Voy"
       - run: yarn run release
-      - <<: *store_artifacts
-
+      - store_artifacts: *ref_2
 workflows:
   version: 2
   build-test-release:
