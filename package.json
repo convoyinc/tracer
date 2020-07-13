@@ -24,7 +24,7 @@
     "watch": "npm run build -- --watch",
     "release": "./scripts/release.sh",
     "build": "tsc --pretty",
-    "test": "jest",
+    "test": "./scripts/test.sh",
     "test:coverage": "jest --coverage",
     "watch:test": "jest --watch"
   },
@@ -42,7 +42,7 @@
     "@types/moment-timezone": "^0.2.34",
     "@types/node": "^8.0.0",
     "@types/uuid": "^3.4.0",
-    "coveralls": "^2.0.0",
+    "coveralls": "^3.1.0",
     "jest": "^20.0.4",
     "jest-environment-node-debug": "^2.0.0",
     "lolex": "^2.1.2",
