@@ -1206,7 +1206,7 @@ escodegen@^1.6.1:
   optionalDependencies:
     source-map "~0.2.0"
 
-esprima@^2.7.1:
+esprima@^2.6.0, esprima@^2.7.1:
   version "2.7.3"
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-2.7.3.tgz#96e3b70d5779f6ad49cd032673d1c312767ba581"
 
@@ -1995,6 +1995,14 @@ jest@^20.0.4:
 js-tokens@^3.0.0:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-3.0.2.tgz#9866df395102130e38f7f996bceb65443209c25b"
+
+js-yaml@3.7.0:
+  version "3.7.0"
+  resolved "https://packages.convoy.com:443/artifactory/api/npm/npm/js-yaml/-/js-yaml-3.7.0.tgz#5c967ddd837a9bfdca5f2de84253abe8a1c03b80"
+  integrity sha1-XJZ93YN6m/3KXy3oQlOr6KHAO4A=
+  dependencies:
+    argparse "^1.0.7"
+    esprima "^2.6.0"
 
 js-yaml@^3.11.0:
   version "3.14.0"

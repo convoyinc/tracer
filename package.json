@@ -45,6 +45,7 @@
     "coveralls": "3.0.2",
     "jest": "^20.0.4",
     "jest-environment-node-debug": "^2.0.0",
+    "js-yaml": "3.7.0",
     "lolex": "^2.1.2",
     "prettier": "^1.5.2",
     "replication": "0.0.7",
