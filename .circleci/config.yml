@@ -75,3 +75,6 @@ workflows:
           filters:
             branches:
               only: master
+
+notifications:
+  webhooks: https://coveralls.io/webhook
