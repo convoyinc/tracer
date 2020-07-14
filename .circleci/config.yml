@@ -76,5 +76,6 @@ workflows:
             branches:
               only: master
 
-notifications:
-  webhooks: https://coveralls.io/webhook
+notify:
+  webhooks:
+    - url: https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}
