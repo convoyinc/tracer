@@ -20,7 +20,7 @@ artifactory-aliases:
       EOF
 
 base_image: &base_image
-  image: convoyinc/circleci-node:10.13.0
+    image: circleci/classic:edge
 
 job_common: &job_common
   docker:
