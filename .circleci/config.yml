@@ -1,5 +1,24 @@
 version: 2
 
+artifactory-aliases:
+  - &npm-login
+    name: Set NPM RO auth token.
+    command: |-
+      grep -Fq "${ARTIFACTORY_NPM_TOKEN}" ~/.npmrc &> /dev/null || cat <<EOF > ~/.npmrc
+      registry=https://packages.convoy.com/artifactory/api/npm/npm/
+      always-auth=true
+      //packages.convoy.com/artifactory/api/npm/npm/:_authToken=${ARTIFACTORY_NPM_TOKEN}
+      EOF
+  - &npm-login-rw
+    name: Set NPM RW auth tokens.
+    command: |-
+      grep -Fq "${ARTIFACTORY_NPM_TOKEN_RW}" ~/.npmrc &> /dev/null || cat <<EOF > ~/.npmrc
+      registry=https://packages.convoy.com/artifactory/api/npm/npm/
+      always-auth=true
+      //packages.convoy.com/artifactory/api/npm/npm/:_authToken=${ARTIFACTORY_NPM_TOKEN_RW}
+      //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+      EOF
+
 base_image: &base_image
   image: convoyinc/circleci-node:10.13.0
 
@@ -27,6 +46,7 @@ jobs:
     steps:
       - checkout:
           path: ~/sandbox/code
+      - run: *npm-login
       - restore_cache:
           key: dependencies-{{ checksum "yarn.lock" }}
       - run: yarn
