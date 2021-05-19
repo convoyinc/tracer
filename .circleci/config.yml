@@ -46,8 +46,6 @@ jobs:
       - <<: *attach
       - run: yarn run test:coverage
       - <<: *store_artifacts
-      - <<: *store_test_results
-      - run: bash <(curl -s https://codecov.io/bash)
 
   release:
     <<: *job_common
